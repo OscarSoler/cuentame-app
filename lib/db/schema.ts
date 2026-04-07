@@ -7,6 +7,7 @@ import {
   text,
   date,
   integer,
+  boolean,
   uniqueIndex,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
@@ -50,6 +51,8 @@ export const transactions = pgTable("transactions", {
   emotion: varchar("emotion"), // happy | neutral | sad
   note: text("note"),
   date: date("date").notNull(),
+  isRecurring: boolean("is_recurring").default(false).notNull(),
+  recurringDay: integer("recurring_day"), // 1–31, día del mes en que se repite
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
 

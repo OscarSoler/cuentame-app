@@ -8,6 +8,13 @@
       "when": 1775530256764,
       "tag": "0000_free_post",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1775533106362,
+      "tag": "0001_wealthy_the_call",
+      "breakpoints": true
     }
   ]
 }
