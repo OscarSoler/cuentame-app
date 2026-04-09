@@ -33,6 +33,8 @@ export const ledgers = pgTable("ledgers", {
     .references(() => users.id),
   name: varchar("name").notNull(),
   type: varchar("type").notNull(), // personal | business
+  businessName: varchar("business_name"),
+  businessType: varchar("business_type"), // tienda | restaurante | servicios | freelancer | otro
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
 
@@ -53,6 +55,8 @@ export const transactions = pgTable("transactions", {
   date: date("date").notNull(),
   isRecurring: boolean("is_recurring").default(false).notNull(),
   recurringDay: integer("recurring_day"), // 1–31, día del mes en que se repite
+  taxType: varchar("tax_type"), // iva | retefuente | ica
+  taxAmount: numeric("tax_amount"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
 
