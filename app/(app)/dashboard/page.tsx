@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { HugeiconsIcon } from "@hugeicons/react";
 import type { IconSvgElement } from "@hugeicons/react";
 import {
   ArrowUp01Icon,
@@ -100,7 +101,7 @@ export default function DashboardPage() {
       <div className="flex gap-2.5">
         <div className="flex items-center gap-2.5 flex-1 bg-white/50 rounded-xl px-3.5 py-3">
           <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-            <ArrowDown01Icon className="text-primary" />
+            <HugeiconsIcon icon={ArrowDown01Icon} size={12} className="text-primary" />
           </div>
           <div>
             <span className="text-[9px] text-muted-foreground/50 block leading-none">Ingresos</span>
@@ -111,7 +112,7 @@ export default function DashboardPage() {
         </div>
         <div className="flex items-center gap-2.5 flex-1 bg-white/50 rounded-xl px-3.5 py-3">
           <div className="w-7 h-7 rounded-full bg-destructive/10 flex items-center justify-center shrink-0">
-            <ArrowUp01Icon className="text-destructive/70" />
+            <HugeiconsIcon icon={ArrowUp01Icon} size={12} className="text-destructive/70" />
           </div>
           <div>
             <span className="text-[9px] text-muted-foreground/50 block leading-none">

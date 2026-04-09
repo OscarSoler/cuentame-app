@@ -57,7 +57,7 @@ export function ChatInput({ isDrawer, isLoading, activeLedgerType, onSubmit, onL
           }}
           placeholder={activeLedgerType === "business" ? "Registra una venta o gasto..." : "Escribe un mensaje..."}
           rows={1}
-          className="flex-1 bg-transparent text-[13px] text-foreground placeholder:text-muted-foreground/40 resize-none outline-none max-h-30 py-1 px-1"
+          className="flex-1 bg-transparent text-base text-foreground placeholder:text-muted-foreground/40 resize-none outline-none max-h-30 py-1 px-1 [font-size:16px]"
         />
         <div className="flex items-center justify-between">
           <div className="relative">
