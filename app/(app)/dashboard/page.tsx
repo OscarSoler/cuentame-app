@@ -22,14 +22,6 @@ import {
   Home01Icon,
   Store01Icon,
 } from "@hugeicons/core-free-icons";
-import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  ResponsiveContainer,
-  Tooltip,
-} from "recharts";
 import { useLedger, type LedgerType } from "@/lib/context/ledger-context";
 import { ScoreWidget } from "@/components/dashboard/score-widget";
 
@@ -38,11 +30,12 @@ const months = [
   "Jul", "Ago", "Sep", "Oct", "Nov", "Dic",
 ];
 
+// Semanas que suman ~4.5M ingresos y ~2.18M gastos
 const chartData = [
-  { name: "S1", ingresos: 1200, gastos: 480 },
-  { name: "S2", ingresos: 1200, gastos: 720 },
-  { name: "S3", ingresos: 800, gastos: 550 },
-  { name: "S4", ingresos: 1300, gastos: 430 },
+  { name: "S1", ingresos: 1050000, gastos: 480000 },
+  { name: "S2", ingresos: 1200000, gastos: 620000 },
+  { name: "S3", ingresos: 900000, gastos: 560000 },
+  { name: "S4", ingresos: 1350000, gastos: 520000 },
 ];
 
 // ── Personal data ──
@@ -99,12 +92,33 @@ function fmt(n: number) {
   return `$${(n / 1000).toFixed(0)}k`;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function ChartTooltip({ active, payload }: any) {
-  if (!active || !payload?.length) return null;
+function WeeklyBars() {
+  const max = Math.max(...chartData.flatMap((d) => [d.ingresos, d.gastos]));
+  const H = 72; // altura total de barras en px
+
   return (
-    <div className="bg-foreground/90 rounded-lg px-2.5 py-1.5 text-[9px] text-primary-foreground shadow-lg">
-      <span>${payload[0]?.value}k</span>
+    <div className="flex items-end justify-between gap-2">
+      {chartData.map((d) => {
+        const incomeH = Math.round((d.ingresos / max) * H);
+        const expenseH = Math.round((d.gastos / max) * H);
+        return (
+          <div key={d.name} className="flex flex-col items-center gap-1.5 flex-1">
+            <div className="flex items-end gap-0.5 w-full justify-center" style={{ height: H }}>
+              {/* Ingreso */}
+              <div
+                className="w-3 rounded-t-sm bg-primary/70"
+                style={{ height: incomeH }}
+              />
+              {/* Gasto */}
+              <div
+                className="w-3 rounded-t-sm bg-destructive/30"
+                style={{ height: expenseH }}
+              />
+            </div>
+            <span className="text-[9px] text-muted-foreground/40">{d.name}</span>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -205,22 +219,21 @@ export default function DashboardPage() {
       </div>
 
       {/* Chart */}
-      <div className="h-32 -mx-1">
-        <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={chartData} margin={{ top: 4, right: 4, left: 4, bottom: 0 }}>
-            <defs>
-              <linearGradient id="gIncome" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#2D5016" stopOpacity={0.15} />
-                <stop offset="100%" stopColor="#2D5016" stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: "#7A726580" }} dy={6} />
-            <YAxis hide />
-            <Tooltip content={<ChartTooltip />} cursor={false} />
-            <Area type="natural" dataKey="ingresos" stroke="#2D5016" strokeWidth={2} fill="url(#gIncome)" dot={false} activeDot={{ r: 3, fill: "#2D5016", strokeWidth: 0 }} />
-            <Area type="natural" dataKey="gastos" stroke="#B4404060" strokeWidth={1.5} strokeDasharray="3 3" fill="transparent" dot={false} activeDot={{ r: 3, fill: "#B44040", strokeWidth: 0 }} />
-          </AreaChart>
-        </ResponsiveContainer>
+      <div className="bg-white/30 rounded-xl px-4 pt-3 pb-2.5">
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-[9px] text-muted-foreground/40 uppercase tracking-wider">Este mes</span>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1">
+              <div className="w-2 h-2 rounded-sm bg-primary/70" />
+              <span className="text-[9px] text-muted-foreground/50">Ingresos</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <div className="w-2 h-2 rounded-sm bg-destructive/30" />
+              <span className="text-[9px] text-muted-foreground/50">Gastos</span>
+            </div>
+          </div>
+        </div>
+        <WeeklyBars />
       </div>
 
       {/* Pillars */}
