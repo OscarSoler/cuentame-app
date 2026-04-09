@@ -1,7 +1,7 @@
 import { openai } from "@ai-sdk/openai";
 import { streamText, UIMessage, convertToModelMessages } from "ai";
-import { chatTools } from "@/lib/ai/tools";
-import { getSystemPrompt } from "@/lib/ai/system-prompt";
+import { getSystemPrompt } from "./system-prompt";
+import { chatTools } from "./tools";
 
 export async function POST(req: Request) {
   const {
