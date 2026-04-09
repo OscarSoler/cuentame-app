@@ -1,5 +1,119 @@
 @AGENTS.md
 
+# Convención de Estructura — NextRails
+
+## Analogía Rails
+
+| Rails | NextRails |
+|---|---|
+| `controllers/` | `app/(app)/[feature]/page.tsx` |
+| `views/[controller]/` | `app/(app)/[feature]/components/` |
+| `models/` | `core/[feature]/` |
+| `components/` | `components/` (solo globales) |
+
+## Las 5 Reglas
+
+**1. La página es el controlador**
+`page.tsx` solo importa + compone. Sin datos mock, sin componentes inline, sin lógica de derivación.
+
+**2. Local vs global**
+- `[feature]/components/` → solo se usa en ese feature
+- `components/` raíz → se usa en 2+ features o es infraestructura de UI
+- Pregunta: _"¿Si borro este feature, el componente desaparece?"_ → sí = local, no = global
+
+**3. Nombres de archivos**
+- Siempre kebab-case
+- Componente: `[noun]-[descriptor].tsx` → `expense-detail-drawer.tsx`
+- Action: `[entity].actions.ts` → `transaction.actions.ts`
+- Use case: `[verb]-[entity].ts` → `create-transaction.ts`
+- `"use client"` solo cuando usa hooks o event handlers
+
+**4. Flujo de datos — sin saltar capas**
+```
+page.tsx → Server Action → Use Case → Repository → DB
+```
+Los componentes React nunca importan desde `infrastructure/` o `application/` directamente.
+
+**5. Drawers/modals son del feature que los dispara**
+Viven en `[feature]/components/` junto al trigger. Subcarpeta solo si supera 3 archivos.
+
+## Estructura de referencia
+
+```
+app/
+  (app)/
+    [feature]/
+      page.tsx           ← controlador: importa actions, compone componentes
+      components/        ← vistas del feature
+  (onboarding)/
+    page.tsx
+    components/
+  api/
+    chat/
+      route.ts           ← solo handlers HTTP, sin lógica de negocio
+
+core/
+  [feature]/             ← Vertical Slicing + Clean Architecture
+    domain/
+      [entity].entity.ts
+      [entity].repository.ts
+    infrastructure/
+      drizzle-[entity].repository.ts
+    application/
+      get-[entity].ts
+      create-[entity].ts
+      update-[entity].ts
+      delete-[entity].ts
+      index.ts           ← barrel export
+    presentation/
+      [entity].actions.ts  ← Server Actions ("use server")
+
+components/
+  navigation/            ← globales de navegación
+  ui/                    ← shadcn base, no tocar
+
+lib/
+  ai/                    ← tools y prompts
+  db/                    ← schema y conexión
+  context/               ← React contexts
+```
+
+## Server Actions
+
+Los Server Actions viven en `core/[feature]/presentation/[entity].actions.ts`.
+
+Son el único punto de contacto entre los componentes React y la lógica de negocio. Siguen este patrón:
+
+```typescript
+"use server";
+
+import { DrizzleTransactionRepository } from "../infrastructure/drizzle-transaction.repository";
+import { CreateTransaction } from "../application/create-transaction";
+
+function repo() {
+  return new DrizzleTransactionRepository();
+}
+
+export async function createTransactionAction(data: TransactionInput) {
+  try {
+    const useCase = new CreateTransaction({ repository: repo() });
+    const result = await useCase.execute(data);
+    return { success: true, data: result };
+  } catch (error) {
+    return { success: false, error: error instanceof Error ? error.message : "Error desconocido" };
+  }
+}
+```
+
+**Reglas de los Server Actions:**
+- Siempre llevan `"use server"` al inicio del archivo
+- Solo instancian el repositorio y el use case — sin lógica de negocio propia
+- Siempre retornan `{ success: boolean, data?, error? }` — nunca lanzan excepciones al cliente
+- Los componentes los importan directamente: `import { createTransactionAction } from "@/core/transaction/presentation/transaction.actions"`
+- Las páginas (`page.tsx`) los pueden llamar directamente al ser Server Components
+
+---
+
 # Arquitectura del Proyecto - NextRails
 
 ## Patrón de Arquitectura

@@ -1,4 +1,4 @@
-import { ChatContent } from "@/app/(app)/chat/chat/chat-content";
+import { ChatContent } from "./components/chat-content";
 
 export default function ChatPage() {
   return (

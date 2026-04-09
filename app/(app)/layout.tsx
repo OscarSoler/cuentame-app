@@ -1,4 +1,4 @@
-import { BottomTabs } from "@/components/bottom-tabs";
+import { BottomTabs } from "@/components/navigation/bottom-tabs";
 import { LedgerProvider } from "@/lib/context/ledger-context";
 
 export default function AppLayout({
