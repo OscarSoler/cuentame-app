@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { createLedgerAction } from "@/core/ledger/presentation/ledger.actions";
 import { WelcomeStep } from "./components/welcome-step";
 import { PhilosophyStep } from "./components/philosophy-step";
 import { NameStep } from "./components/name-step";
 import { LedgerTypeStep } from "./components/ledger-type-step";
 import { BusinessSetupStep } from "./components/business-setup-step";
+import { PhoneAuthStep } from "./components/phone-auth-step";
 import { ReadyStep } from "./components/ready-step";
 import type { LedgerKind } from "./components/types";
 
@@ -19,7 +21,8 @@ export default function OnboardingPage() {
   const [businessType, setBusinessType] = useState("");
 
   const hasBusiness = ledgerTypes.includes("business");
-  const totalSteps = hasBusiness ? 6 : 5;
+  // pasos: welcome, philosophy, name, ledgerType, [business], phoneAuth, ready
+  const totalSteps = hasBusiness ? 7 : 6;
 
   const toggleLedgerType = (type: LedgerKind) => {
     setLedgerTypes((prev) =>
@@ -27,11 +30,26 @@ export default function OnboardingPage() {
     );
   };
 
+  // después de ledgerType: si hay business va al 4, si no al 5 (phoneAuth)
   const handleLedgerNext = () => setStep(hasBusiness ? 4 : 5);
+
+  const handlePhoneAuthSuccess = async () => {
+    const types = ledgerTypes.length > 0 ? ledgerTypes : ["personal" as const];
+    await Promise.all(
+      types.map((type) =>
+        createLedgerAction({
+          name: type === "business" ? (businessName || name) : name,
+          type,
+          businessName: type === "business" ? businessName : undefined,
+          businessType: type === "business" ? businessType : undefined,
+        })
+      )
+    );
+    setStep(hasBusiness ? 6 : 6);
+  };
 
   return (
     <div className="flex flex-col h-dvh w-full bg-linear-to-b from-[#FAF7F2] via-[#F5F0E8] to-[#E8E0D0]">
-      {/* Progress dots */}
       <div className="flex justify-center gap-2 pt-5">
         {Array.from({ length: totalSteps }, (_, i) => (
           <div
@@ -56,7 +74,8 @@ export default function OnboardingPage() {
           onBusinessTypeChange={setBusinessType}
         />
       )}
-      {step === 5 && <ReadyStep name={name} onStart={() => router.push("/chat")} />}
+      {step === 5 && <PhoneAuthStep onSuccess={handlePhoneAuthSuccess} />}
+      {step === 6 && <ReadyStep name={name} onStart={() => router.push("/dashboard")} />}
     </div>
   );
 }

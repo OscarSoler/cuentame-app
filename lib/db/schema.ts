@@ -10,16 +10,14 @@ import {
   boolean,
   uniqueIndex,
 } from "drizzle-orm/pg-core";
+import { users } from "./auth-schema";
 import { sql } from "drizzle-orm";
 
-// ─── Users ───────────────────────────────────────────────
-export const users = pgTable("users", {
-  id: uuid("id")
-    .primaryKey()
-    .default(sql`gen_random_uuid()`),
-  name: varchar("name"),
+// ─── Profiles ────────────────────────────────────────────
+// Datos de negocio del usuario — better-auth gestiona la tabla "users"
+export const profiles = pgTable("profiles", {
+  id: text("id").primaryKey(), // mismo id que better-auth users.id
   phone: varchar("phone").unique(),
-  authProvider: varchar("auth_provider").default("otp"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
 
@@ -28,9 +26,9 @@ export const ledgers = pgTable("ledgers", {
   id: uuid("id")
     .primaryKey()
     .default(sql`gen_random_uuid()`),
-  userId: uuid("user_id")
+  userId: text("user_id")
     .notNull()
-    .references(() => users.id),
+    .references(() => users.id, { onDelete: "cascade" }),
   name: varchar("name").notNull(),
   type: varchar("type").notNull(), // personal | business
   businessName: varchar("business_name"),

@@ -22,6 +22,13 @@
       "when": 1775582559626,
       "tag": "0002_gifted_black_cat",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1775753258540,
+      "tag": "0003_melodic_prodigy",
+      "breakpoints": true
     }
   ]
 }
