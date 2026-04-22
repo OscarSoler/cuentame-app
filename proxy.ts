@@ -10,13 +10,13 @@ export function proxy(request: NextRequest) {
   const isSetup = pathname === "/setup";
   const isApiRoute = pathname.startsWith("/api");
 
-  if (!session && !isAuthRoute && !isOnboarding && !isSetup && !isApiRoute) {
-    return NextResponse.redirect(new URL("/login", request.url));
-  }
+  // if (!session && !isAuthRoute && !isOnboarding && !isSetup && !isApiRoute) {
+  //   return NextResponse.redirect(new URL("/login", request.url));
+  // }
 
-  if (session && isAuthRoute) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
-  }
+  // if (session && isAuthRoute) {
+  //   return NextResponse.redirect(new URL("/dashboard", request.url));
+  // }
 
   return NextResponse.next();
 }

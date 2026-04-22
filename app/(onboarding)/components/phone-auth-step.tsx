@@ -47,18 +47,6 @@ export function PhoneAuthStep({ onSuccess }: PhoneAuthStepProps) {
   const handleVerify = async (code: string) => {
     setError("");
     setLoading(true);
-
-    // Código de acceso para cuenta de prueba
-    if (code === "192500") {
-      try {
-        await onSuccess();
-      } catch {
-        setLoading(false);
-        setError("Ocurrió un error. Intenta de nuevo.");
-      }
-      return;
-    }
-
     const { error: err } = await authClient.phoneNumber.verify({
       phoneNumber: phone,
       code,
