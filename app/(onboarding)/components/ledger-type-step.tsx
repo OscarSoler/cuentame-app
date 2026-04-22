@@ -80,11 +80,7 @@ export function LedgerTypeStep({ onNext, ledgerTypes, onToggleLedgerType }: Ledg
         </div>
       </div>
 
-      <Button
-        onClick={onNext}
-        disabled={ledgerTypes.length === 0}
-        className="w-full max-w-65 h-11 rounded-full bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 disabled:opacity-40 cursor-pointer"
-      >
+      <Button onClick={onNext} disabled={ledgerTypes.length === 0} className="w-full">
         Continuar
       </Button>
     </div>

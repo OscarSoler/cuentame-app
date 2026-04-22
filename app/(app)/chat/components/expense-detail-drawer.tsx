@@ -212,18 +212,11 @@ export function ExpenseDetailDrawer({
 
           {/* Actions */}
           <div className="flex gap-2.5 pt-1">
-            <Button
-              variant="outline"
-              onClick={() => setOpen(false)}
-              className="flex-1 h-11 rounded-full text-sm border-destructive/20 text-destructive hover:bg-destructive/5 cursor-pointer"
-            >
-              <HugeiconsIcon icon={Delete02Icon} size={14} className="mr-1.5" />
+            <Button variant="destructive" onClick={() => setOpen(false)} className="flex-1">
+              <HugeiconsIcon icon={Delete02Icon} size={14} />
               Eliminar
             </Button>
-            <Button
-              onClick={handleSave}
-              className="flex-1 h-11 rounded-full bg-primary text-primary-foreground text-sm hover:bg-primary/90 cursor-pointer"
-            >
+            <Button onClick={handleSave} className="flex-1">
               Guardar
             </Button>
           </div>

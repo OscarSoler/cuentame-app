@@ -28,7 +28,7 @@ export function BalanceHeader({ income, expenses, month, isBusiness, onMonthChan
     <div className="flex items-center justify-between">
       {/* Saludo + balance */}
       <div>
-        <p className="text-xl font-semibold leading-none mb-1.5">
+        <p className="font-accent text-xl font-semibold leading-none mb-1.5">
           Cuéntame, <span className="text-primary">{MOCK_NAME}</span>
         </p>
         <p className="text-sm text-muted-foreground/60 leading-none">

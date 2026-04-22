@@ -54,25 +54,34 @@ export function BottomTabs() {
   const isChatActive = pathname.startsWith("/chat");
   const [compact, setCompact] = useState(false);
   const lastScrollY = useRef(0);
+  const ticking = useRef(false);
 
   useEffect(() => {
-    // El scroll está en el div padre con overflow-y-auto
     const scrollContainer = document.querySelector<HTMLElement>(
       "[data-scroll-container]"
     );
     if (!scrollContainer) return;
 
     const onScroll = () => {
-      const current = scrollContainer.scrollTop;
-      const delta = current - lastScrollY.current;
+      if (ticking.current) return;
+      ticking.current = true;
 
-      if (delta > 4) {
-        setCompact(true);
-      } else if (delta < -4) {
-        setCompact(false);
-      }
+      requestAnimationFrame(() => {
+        const current = scrollContainer.scrollTop;
+        const max = scrollContainer.scrollHeight - scrollContainer.clientHeight;
+        const delta = current - lastScrollY.current;
 
-      lastScrollY.current = current;
+        // Ignorar micro-movimientos y zona al final del scroll
+        if (Math.abs(delta) > 6 && current < max - 10) {
+          setCompact(delta > 0);
+        }
+
+        // Al llegar al top siempre expandir
+        if (current <= 0) setCompact(false);
+
+        lastScrollY.current = current;
+        ticking.current = false;
+      });
     };
 
     scrollContainer.addEventListener("scroll", onScroll, { passive: true });

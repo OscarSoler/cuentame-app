@@ -32,10 +32,7 @@ export function ReadyStep({ name, onStart }: ReadyStepProps) {
         </div>
       </div>
 
-      <Button
-        onClick={onStart}
-        className="w-full max-w-65 h-11 rounded-full bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 cursor-pointer"
-      >
+      <Button onClick={onStart} className="w-full">
         Comenzar
       </Button>
     </div>

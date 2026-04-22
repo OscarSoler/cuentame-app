@@ -159,11 +159,7 @@ export function PhoneAuthStep({ onSuccess }: PhoneAuthStepProps) {
         {error && <p className="text-sm text-destructive">{error}</p>}
       </form>
 
-      <Button
-        onClick={handleSendOtp}
-        disabled={loading || !phone.trim()}
-        className="w-full max-w-65 h-11 rounded-full bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 disabled:opacity-40 cursor-pointer"
-      >
+      <Button onClick={handleSendOtp} disabled={loading || !phone.trim()} className="w-full">
         {loading ? "Enviando..." : "Continuar"}
       </Button>
     </div>

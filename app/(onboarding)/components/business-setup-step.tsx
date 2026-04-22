@@ -74,11 +74,7 @@ export function BusinessSetupStep({
         </div>
       </div>
 
-      <Button
-        onClick={onNext}
-        disabled={!businessName.trim() || !businessType}
-        className="w-full max-w-65 h-11 rounded-full bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 disabled:opacity-40 cursor-pointer"
-      >
+      <Button onClick={onNext} disabled={!businessName.trim() || !businessType} className="w-full">
         Continuar
       </Button>
     </div>
