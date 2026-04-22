@@ -1,6 +1,7 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { phoneNumber } from "better-auth/plugins";
+import { nextCookies } from "better-auth/next-js";
 import { db } from "@/lib/db";
 import * as authSchema from "@/lib/db/auth-schema";
 
@@ -30,5 +31,6 @@ export const auth = betterAuth({
       otpLength: 6,
       expiresIn: 300, // 5 minutos
     }),
+    nextCookies(), // debe ir último — propaga Set-Cookie a Server Actions
   ],
 });

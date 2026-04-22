@@ -1,9 +1,13 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Leaf01Icon, Tree06Icon } from "@hugeicons/core-free-icons";
+import { useRouter } from "next/navigation";
 import type { StepProps } from "./types";
 
 export function WelcomeStep({ onNext }: StepProps) {
+  const router = useRouter();
   return (
     <div className="flex flex-col items-center text-center flex-1 justify-between py-10 px-6">
       <div className="text-[10px] tracking-[0.25em] uppercase text-muted-foreground/70">
@@ -38,12 +42,21 @@ export function WelcomeStep({ onNext }: StepProps) {
         </p>
       </div>
 
-      <Button
-        onClick={onNext}
-        className="w-full max-w-65 h-11 rounded-full bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 cursor-pointer"
-      >
-        Empezar Mi Camino
-      </Button>
+      <div className="flex flex-col items-center gap-3 w-full max-w-65">
+        <Button
+          onClick={onNext}
+          className="w-full h-11 rounded-full bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 cursor-pointer"
+        >
+          Empezar Mi Camino
+        </Button>
+        <Button
+          variant="secondary"
+          onClick={() => router.push("/login")}
+          className="w-full h-11 rounded-full text-sm text-muted-foreground cursor-pointer"
+        >
+          Ya tengo una cuenta
+        </Button>
+      </div>
     </div>
   );
 }

@@ -37,7 +37,12 @@ export default function RootLayout({
       lang="es"
       className={`${geistSans.variable} ${playfair.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="h-dvh flex flex-col" suppressHydrationWarning>
+        <div className="fixed inset-0 -z-10 h-full w-full bg-white [background:radial-gradient(125%_125%_at_50%_10%,#fff_40%,#E8D5A3_100%)]" />
+        <div className="container mx-auto h-full flex flex-col shadow-xl bg-transparent">
+          {children}
+        </div>
+      </body>
     </html>
   );
 }

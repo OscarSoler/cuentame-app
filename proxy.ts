@@ -1,15 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSessionCookie } from "better-auth/cookies";
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const session = getSessionCookie(request);
   const { pathname } = request.nextUrl;
 
   const isAuthRoute = pathname.startsWith("/login");
   const isOnboarding = pathname === "/";
+  const isSetup = pathname === "/setup";
   const isApiRoute = pathname.startsWith("/api");
 
-  if (!session && !isAuthRoute && !isOnboarding && !isApiRoute) {
+  if (!session && !isAuthRoute && !isOnboarding && !isSetup && !isApiRoute) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 

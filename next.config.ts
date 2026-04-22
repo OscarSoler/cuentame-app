@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  allowedDevOrigins: ["fish-consider-medicine-accessories.trycloudflare.com"],
+  allowedDevOrigins: ["dust-craft-transactions-creating.trycloudflare.com"],
 };
 
 export default nextConfig;

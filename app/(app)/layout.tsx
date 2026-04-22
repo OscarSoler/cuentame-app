@@ -8,7 +8,7 @@ export default function AppLayout({
 }>) {
   return (
     <LedgerProvider>
-      <div className="flex flex-col h-dvh w-full bg-linear-to-b from-[#FAF7F2] via-[#F5F0E8] to-[#E8E0D0]">
+      <div className="flex flex-col h-dvh w-full">
         <div className="flex-1 overflow-y-auto">{children}</div>
         <BottomTabs />
       </div>

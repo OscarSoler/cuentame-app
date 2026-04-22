@@ -16,7 +16,7 @@ interface LedgerTabsProps {
 
 export function LedgerTabs({ active, onChange }: LedgerTabsProps) {
   return (
-    <div className="flex bg-white/40 rounded-xl p-1 gap-1">
+    <div className="flex bg-black/5 rounded-xl p-1 gap-1">
       {tabs.map((tab) => {
         const isActive = active === tab.type;
         return (

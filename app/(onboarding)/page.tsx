@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createLedgerAction } from "@/core/ledger/presentation/ledger.actions";
+
 import { WelcomeStep } from "./components/welcome-step";
 import { PhilosophyStep } from "./components/philosophy-step";
 import { NameStep } from "./components/name-step";
@@ -26,7 +26,7 @@ export default function OnboardingPage() {
 
   const toggleLedgerType = (type: LedgerKind) => {
     setLedgerTypes((prev) =>
-      prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
+      prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type],
     );
   };
 
@@ -34,28 +34,32 @@ export default function OnboardingPage() {
   const handleLedgerNext = () => setStep(hasBusiness ? 4 : 5);
 
   const handlePhoneAuthSuccess = async () => {
+    // Guardar datos del onboarding para procesarlos en el dashboard
     const types = ledgerTypes.length > 0 ? ledgerTypes : ["personal" as const];
-    await Promise.all(
-      types.map((type) =>
-        createLedgerAction({
-          name: type === "business" ? (businessName || name) : name,
-          type,
-          businessName: type === "business" ? businessName : undefined,
-          businessType: type === "business" ? businessType : undefined,
-        })
-      )
+    sessionStorage.setItem(
+      "onboarding",
+      JSON.stringify({
+        name,
+        types,
+        businessName,
+        businessType,
+      }),
     );
-    setStep(hasBusiness ? 6 : 6);
+    setStep(6);
   };
 
   return (
-    <div className="flex flex-col h-dvh w-full bg-linear-to-b from-[#FAF7F2] via-[#F5F0E8] to-[#E8E0D0]">
+    <div className="flex flex-col h-dvh w-full bg-transparent ">
       <div className="flex justify-center gap-2 pt-5">
         {Array.from({ length: totalSteps }, (_, i) => (
           <div
             key={i}
             className={`h-1 rounded-full transition-all duration-300 ${
-              i === step ? "w-5 bg-primary" : i < step ? "w-1.5 bg-primary/30" : "w-1.5 bg-border/60"
+              i === step
+                ? "w-5 bg-primary"
+                : i < step
+                  ? "w-1.5 bg-primary/30"
+                  : "w-1.5 bg-border/60"
             }`}
           />
         ))}
@@ -63,8 +67,20 @@ export default function OnboardingPage() {
 
       {step === 0 && <WelcomeStep onNext={() => setStep(1)} />}
       {step === 1 && <PhilosophyStep onNext={() => setStep(2)} />}
-      {step === 2 && <NameStep onNext={() => setStep(3)} name={name} onNameChange={setName} />}
-      {step === 3 && <LedgerTypeStep onNext={handleLedgerNext} ledgerTypes={ledgerTypes} onToggleLedgerType={toggleLedgerType} />}
+      {step === 2 && (
+        <NameStep
+          onNext={() => setStep(3)}
+          name={name}
+          onNameChange={setName}
+        />
+      )}
+      {step === 3 && (
+        <LedgerTypeStep
+          onNext={handleLedgerNext}
+          ledgerTypes={ledgerTypes}
+          onToggleLedgerType={toggleLedgerType}
+        />
+      )}
       {step === 4 && hasBusiness && (
         <BusinessSetupStep
           onNext={() => setStep(5)}
@@ -75,7 +91,9 @@ export default function OnboardingPage() {
         />
       )}
       {step === 5 && <PhoneAuthStep onSuccess={handlePhoneAuthSuccess} />}
-      {step === 6 && <ReadyStep name={name} onStart={() => router.push("/dashboard")} />}
+      {step === 6 && (
+        <ReadyStep name={name} onStart={() => router.push("/setup")} />
+      )}
     </div>
   );
 }

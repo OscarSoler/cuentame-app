@@ -48,7 +48,7 @@ export function PillarsRow({ pillars, isBusiness }: PillarsRowProps) {
               </div>
               <div className="text-center">
                 <span className="text-[10px] font-medium text-foreground/70 block leading-none">{p.label}</span>
-                <span className="text-[9px] text-muted-foreground/40 mt-0.5 block">{fmt(p.spent)}</span>
+                <span className="text-[9px] text-muted-foreground/70 mt-0.5 block">{fmt(p.spent)}</span>
               </div>
             </div>
           );

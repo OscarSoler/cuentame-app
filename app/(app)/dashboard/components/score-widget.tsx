@@ -40,20 +40,20 @@ export function ScoreWidget({ ledgerType }: ScoreWidgetProps) {
   const activeDays = new Set([0, 1, 2, 3, 4]); // lunes a viernes
 
   return (
-    <div className="bg-white/50 rounded-xl px-3.5 py-2.5 flex items-center gap-3">
+    <div className="bg-white rounded-xl px-3.5 py-2.5 flex items-center gap-3 shadow-sm">
       {/* Score */}
       <div className="flex items-center gap-1.5 shrink-0">
         <HugeiconsIcon icon={Award01Icon} size={13} className="text-primary" strokeWidth={1.5} />
         <span className="text-sm font-semibold text-foreground">{MOCK_SCORE.toLocaleString()}</span>
-        <span className="text-[9px] text-muted-foreground/40">pts</span>
+        <span className="text-[9px] text-muted-foreground/70">pts</span>
       </div>
 
       {/* Level + progress */}
       <div className="flex flex-col gap-1 flex-1 min-w-0">
         <div className="flex items-center justify-between">
-          <span className="text-[9px] text-muted-foreground/50 truncate">Nv.{index + 1} · {label}</span>
+          <span className="text-[9px] text-muted-foreground/70 truncate">Nv.{index + 1} · {label}</span>
           {nextMin && (
-            <span className="text-[9px] text-muted-foreground/30 shrink-0 ml-1">{nextMin - MOCK_SCORE} pts</span>
+            <span className="text-[9px] text-muted-foreground/60 shrink-0 ml-1">{nextMin - MOCK_SCORE} pts</span>
           )}
         </div>
         <div className="h-1 bg-border/30 rounded-full overflow-hidden">
@@ -78,7 +78,7 @@ export function ScoreWidget({ ledgerType }: ScoreWidgetProps) {
             className={`w-4 h-4 rounded-sm flex items-center justify-center text-[7px] font-medium transition-colors ${
               activeDays.has(i)
                 ? "bg-primary text-primary-foreground"
-                : "bg-border/20 text-muted-foreground/30"
+                : "bg-border/20 text-muted-foreground/60"
             }`}
           >
             {activeDays.has(i) ? "✓" : day}

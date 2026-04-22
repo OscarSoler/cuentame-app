@@ -2,19 +2,19 @@
 
 import { useRouter } from "next/navigation";
 import { PhoneAuthStep } from "@/app/(onboarding)/components/phone-auth-step";
-import { getUserLedgersAction } from "@/core/ledger/presentation/ledger.actions";
 
 export default function LoginPage() {
   const router = useRouter();
 
+  // Después de verificar OTP, el proxy redirige según la sesión.
+  // Navegamos a /dashboard — si el proxy detecta que no hay ledgers
+  // el dashboard se encarga de redirigir al onboarding.
   const handleSuccess = async () => {
-    const result = await getUserLedgersAction();
-    const hasLedgers = result.success && result.data && result.data.length > 0;
-    router.push(hasLedgers ? "/dashboard" : "/");
+    router.push("/setup");
   };
 
   return (
-    <div className="flex flex-col h-dvh w-full bg-linear-to-b from-[#FAF7F2] via-[#F5F0E8] to-[#E8E0D0]">
+    <div className="flex flex-col h-dvh w-full">
       <PhoneAuthStep onSuccess={handleSuccess} />
     </div>
   );

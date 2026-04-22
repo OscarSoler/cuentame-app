@@ -13,9 +13,9 @@ export function WeeklyChart({ data }: WeeklyChartProps) {
   const H = 72;
 
   return (
-    <div className="bg-white/30 rounded-xl px-4 pt-3 pb-2.5">
+    <div className="bg-white rounded-xl px-4 pt-3 pb-2.5 shadow-sm">
       <div className="flex items-center justify-between mb-3">
-        <span className="text-[9px] text-muted-foreground/40 uppercase tracking-wider">Este mes</span>
+        <span className="text-[9px] text-muted-foreground/70 uppercase tracking-wider">Este mes</span>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1">
             <div className="w-2 h-2 rounded-sm bg-primary/70" />
@@ -38,7 +38,7 @@ export function WeeklyChart({ data }: WeeklyChartProps) {
                 <div className="w-3 rounded-t-sm bg-primary/70" style={{ height: incomeH }} />
                 <div className="w-3 rounded-t-sm bg-destructive/30" style={{ height: expenseH }} />
               </div>
-              <span className="text-[9px] text-muted-foreground/40">{d.name}</span>
+              <span className="text-[9px] text-muted-foreground/70">{d.name}</span>
             </div>
           );
         })}

@@ -8,11 +8,13 @@ import { headers } from "next/headers";
 
 export async function getUserLedgersAction() {
   try {
-    const session = await auth.api.getSession({ headers: await headers() });
+    const h = await headers();
+    const session = await auth.api.getSession({ headers: h });
+
     if (!session) return { success: false, error: "No autenticado" };
 
     const result = await db
-      .select()
+      .select({ id: ledgers.id })
       .from(ledgers)
       .where(eq(ledgers.userId, session.user.id));
 
@@ -20,7 +22,7 @@ export async function getUserLedgersAction() {
   } catch (error) {
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Error desconocido",
+      error: error instanceof Error ? error.message : String(error),
     };
   }
 }
@@ -34,7 +36,9 @@ interface CreateLedgerInput {
 
 export async function createLedgerAction(input: CreateLedgerInput) {
   try {
-    const session = await auth.api.getSession({ headers: await headers() });
+    const h = await headers();
+    const session = await auth.api.getSession({ headers: h });
+
     if (!session) return { success: false, error: "No autenticado" };
 
     const [ledger] = await db
@@ -43,16 +47,16 @@ export async function createLedgerAction(input: CreateLedgerInput) {
         userId: session.user.id,
         name: input.name,
         type: input.type,
-        businessName: input.businessName,
-        businessType: input.businessType,
+        businessName: input.businessName ?? null,
+        businessType: input.businessType ?? null,
       })
-      .returning();
+      .returning({ id: ledgers.id });
 
-    return { success: true, data: ledger };
+    return { success: true, data: { id: ledger.id } };
   } catch (error) {
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Error desconocido",
+      error: error instanceof Error ? error.message : String(error),
     };
   }
 }

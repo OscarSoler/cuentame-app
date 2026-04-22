@@ -12,7 +12,7 @@ import { SmartPhone01Icon } from "@hugeicons/core-free-icons";
 import { authClient } from "@/lib/auth-client";
 
 interface PhoneAuthStepProps {
-  onSuccess: () => void;
+  onSuccess: () => Promise<void> | void;
 }
 
 type SubStep = "phone" | "otp";
@@ -51,13 +51,18 @@ export function PhoneAuthStep({ onSuccess }: PhoneAuthStepProps) {
       phoneNumber: phone,
       code,
     });
-    setLoading(false);
     if (err) {
+      setLoading(false);
       setError(err.message ?? "Código incorrecto");
       setOtp("");
       return;
     }
-    onSuccess();
+    try {
+      await onSuccess();
+    } catch {
+      setLoading(false);
+      setError("Ocurrió un error. Intenta de nuevo.");
+    }
   };
 
   const handleOtpChange = (val: string) => {
@@ -66,6 +71,18 @@ export function PhoneAuthStep({ onSuccess }: PhoneAuthStepProps) {
   };
 
   if (subStep === "otp") {
+    if (loading) {
+      return (
+        <div className="flex flex-col items-center justify-center flex-1 gap-6">
+          <div className="relative w-24 h-24">
+            <div className="absolute inset-0 rounded-full border-4 border-primary/20" />
+            <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-primary animate-spin" />
+          </div>
+          <p className="text-base text-muted-foreground">Verificando...</p>
+        </div>
+      );
+    }
+
     return (
       <div className="flex flex-col items-center text-center flex-1 justify-between py-10 px-6">
         <div className="text-[10px] tracking-[0.25em] uppercase text-muted-foreground/70">
@@ -101,8 +118,7 @@ export function PhoneAuthStep({ onSuccess }: PhoneAuthStepProps) {
         </div>
 
         <div className="flex flex-col gap-3 w-full max-w-65">
-          {loading && <p className="text-sm text-muted-foreground text-center">Verificando...</p>}
-          <Button variant="ghost" onClick={() => { setSubStep("phone"); setOtp(""); setError(""); }} disabled={loading}>
+          <Button variant="ghost" onClick={() => { setSubStep("phone"); setOtp(""); setError(""); }}>
             Cambiar número
           </Button>
         </div>
@@ -116,7 +132,7 @@ export function PhoneAuthStep({ onSuccess }: PhoneAuthStepProps) {
         Tu acceso
       </div>
 
-      <div className="flex flex-col items-center gap-6 w-full">
+      <form onSubmit={(e) => { e.preventDefault(); handleSendOtp(); }} className="flex flex-col items-center gap-6 w-full">
         <div className="w-14 h-14 rounded-full bg-accent/40 flex items-center justify-center">
           <HugeiconsIcon icon={SmartPhone01Icon} size={28} className="text-primary" strokeWidth={1.5} />
         </div>
@@ -141,7 +157,7 @@ export function PhoneAuthStep({ onSuccess }: PhoneAuthStepProps) {
         />
 
         {error && <p className="text-sm text-destructive">{error}</p>}
-      </div>
+      </form>
 
       <Button
         onClick={handleSendOtp}
