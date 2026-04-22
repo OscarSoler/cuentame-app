@@ -1,10 +1,14 @@
 "use server";
 
-import { db } from "@/lib/db";
-import { ledgers } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
 import { auth } from "@/app/lib/auth";
 import { headers } from "next/headers";
+import { DrizzleLedgerRepository } from "../infrastructure/drizzle-ledger.repository";
+import { GetLedger } from "../application/get-ledger";
+import { CreateLedger } from "../application/create-ledger";
+
+function repo() {
+  return new DrizzleLedgerRepository();
+}
 
 export async function getUserLedgersAction() {
   try {
@@ -13,12 +17,10 @@ export async function getUserLedgersAction() {
 
     if (!session) return { success: false, error: "No autenticado" };
 
-    const result = await db
-      .select({ id: ledgers.id })
-      .from(ledgers)
-      .where(eq(ledgers.userId, session.user.id));
+    const getLedger = new GetLedger({ repository: repo() });
+    const ledgers = await getLedger.byUserId(session.user.id);
 
-    return { success: true, data: result };
+    return { success: true, data: ledgers.map((l) => ({ id: l.id })) };
   } catch (error) {
     return {
       success: false,
@@ -41,16 +43,14 @@ export async function createLedgerAction(input: CreateLedgerInput) {
 
     if (!session) return { success: false, error: "No autenticado" };
 
-    const [ledger] = await db
-      .insert(ledgers)
-      .values({
-        userId: session.user.id,
-        name: input.name,
-        type: input.type,
-        businessName: input.businessName ?? null,
-        businessType: input.businessType ?? null,
-      })
-      .returning({ id: ledgers.id });
+    const createLedger = new CreateLedger({ repository: repo() });
+    const ledger = await createLedger.execute({
+      userId: session.user.id,
+      name: input.name,
+      type: input.type,
+      businessName: input.businessName ?? null,
+      businessType: input.businessType ?? null,
+    });
 
     return { success: true, data: { id: ledger.id } };
   } catch (error) {
