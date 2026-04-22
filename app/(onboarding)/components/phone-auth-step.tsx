@@ -12,12 +12,13 @@ import { SmartPhone01Icon } from "@hugeicons/core-free-icons";
 import { authClient } from "@/lib/auth-client";
 
 interface PhoneAuthStepProps {
+  name?: string;
   onSuccess: () => Promise<void> | void;
 }
 
 type SubStep = "phone" | "otp";
 
-export function PhoneAuthStep({ onSuccess }: PhoneAuthStepProps) {
+export function PhoneAuthStep({ name, onSuccess }: PhoneAuthStepProps) {
   const [subStep, setSubStep] = useState<SubStep>("phone");
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
@@ -56,6 +57,13 @@ export function PhoneAuthStep({ onSuccess }: PhoneAuthStepProps) {
       setError(err.message ?? "Código incorrecto");
       setOtp("");
       return;
+    }
+    const trimmedName = name?.trim();
+    if (trimmedName) {
+      const { error: updateErr } = await authClient.updateUser({ name: trimmedName });
+      if (updateErr) {
+        console.error("No se pudo guardar el nombre del usuario", updateErr);
+      }
     }
     try {
       await onSuccess();

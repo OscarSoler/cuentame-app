@@ -90,7 +90,7 @@ export default function OnboardingPage() {
           onBusinessTypeChange={setBusinessType}
         />
       )}
-      {step === 5 && <PhoneAuthStep onSuccess={handlePhoneAuthSuccess} />}
+      {step === 5 && <PhoneAuthStep name={name} onSuccess={handlePhoneAuthSuccess} />}
       {step === 6 && (
         <ReadyStep name={name} onStart={() => router.push("/setup")} />
       )}

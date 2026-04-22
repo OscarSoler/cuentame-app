@@ -2,6 +2,7 @@
 
 import { HugeiconsIcon } from "@hugeicons/react";
 import { ArrowLeft01Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons";
+import { useSession } from "@/lib/auth-client";
 
 const months = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
 
@@ -10,8 +11,9 @@ function fmt(n: number) {
   return `$${(n / 1000).toFixed(0)}k`;
 }
 
-// Mock — se reemplazará con datos reales del usuario
-const MOCK_NAME = "Oscar";
+function firstName(fullName?: string | null) {
+  return fullName?.trim().split(/\s+/)[0] ?? "";
+}
 
 interface BalanceHeaderProps {
   income: number;
@@ -23,13 +25,19 @@ interface BalanceHeaderProps {
 
 export function BalanceHeader({ income, expenses, month, isBusiness, onMonthChange }: BalanceHeaderProps) {
   const balance = income - expenses;
+  const { data: session } = useSession();
+  const displayName = firstName(session?.user.name);
 
   return (
     <div className="flex items-center justify-between">
       {/* Saludo + balance */}
       <div>
         <p className="font-accent text-xl font-semibold leading-none mb-1.5">
-          Cuéntame, <span className="text-primary">{MOCK_NAME}</span>
+          {displayName ? (
+            <>Cuéntame, <span className="text-primary">{displayName}</span></>
+          ) : (
+            "Cuéntame"
+          )}
         </p>
         <p className="text-sm text-muted-foreground/60 leading-none">
           {fmt(balance)} este mes
