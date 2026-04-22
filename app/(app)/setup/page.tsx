@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Tree06Icon } from "@hugeicons/core-free-icons";
-import { createLedgerAction, getUserLedgersAction } from "@/core/ledger/presentation/ledger.actions";
+import { createLedgerAction } from "@/core/ledger/presentation/ledger.actions";
+import { hasUserLedgers } from "@/components/auth/has-user-ledgers";
 
 export default function SetupPage() {
   const router = useRouter();
@@ -15,8 +16,7 @@ export default function SetupPage() {
       const raw = sessionStorage.getItem("onboarding");
 
       if (!raw) {
-        const { data } = await getUserLedgersAction();
-        router.replace(data && data.length > 0 ? "/dashboard" : "/");
+        router.replace((await hasUserLedgers()) ? "/dashboard" : "/");
         return;
       }
 

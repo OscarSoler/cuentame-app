@@ -11,14 +11,13 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { SmartPhone01Icon } from "@hugeicons/core-free-icons";
 import { authClient } from "@/lib/auth-client";
 
-interface PhoneAuthStepProps {
-  name?: string;
-  onSuccess: () => Promise<void> | void;
+interface PhoneAuthFormProps {
+  onVerified: () => Promise<void> | void;
 }
 
 type SubStep = "phone" | "otp";
 
-export function PhoneAuthStep({ name, onSuccess }: PhoneAuthStepProps) {
+export function PhoneAuthForm({ onVerified }: PhoneAuthFormProps) {
   const [subStep, setSubStep] = useState<SubStep>("phone");
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
@@ -26,6 +25,7 @@ export function PhoneAuthStep({ name, onSuccess }: PhoneAuthStepProps) {
   const [error, setError] = useState("");
 
   const handleSendOtp = async () => {
+    if (loading) return;
     setError("");
     const normalized = phone.startsWith("+") ? phone : `+${phone}`;
     if (normalized.length < 8) {
@@ -46,6 +46,7 @@ export function PhoneAuthStep({ name, onSuccess }: PhoneAuthStepProps) {
   };
 
   const handleVerify = async (code: string) => {
+    if (loading) return;
     setError("");
     setLoading(true);
     const { error: err } = await authClient.phoneNumber.verify({
@@ -58,22 +59,11 @@ export function PhoneAuthStep({ name, onSuccess }: PhoneAuthStepProps) {
       setOtp("");
       return;
     }
-    const trimmedName = name?.trim();
-    if (trimmedName) {
-      const { error: updateErr } = await authClient.updateUser({ name: trimmedName });
-      if (updateErr) {
-        console.error("No se pudo guardar el nombre del usuario", updateErr);
-      }
-    }
-    try {
-      await onSuccess();
-    } catch {
-      setLoading(false);
-      setError("Ocurrió un error. Intenta de nuevo.");
-    }
+    await onVerified();
   };
 
   const handleOtpChange = (val: string) => {
+    if (loading) return;
     setOtp(val);
     if (val.length === 6) handleVerify(val);
   };
@@ -113,23 +103,22 @@ export function PhoneAuthStep({ name, onSuccess }: PhoneAuthStepProps) {
 
           <InputOTP maxLength={6} value={otp} onChange={handleOtpChange} disabled={loading}>
             <InputOTPGroup className="gap-2">
-              <InputOTPSlot index={0} className="size-12 text-xl rounded-xl border" />
-              <InputOTPSlot index={1} className="size-12 text-xl rounded-xl border" />
-              <InputOTPSlot index={2} className="size-12 text-xl rounded-xl border" />
-              <InputOTPSlot index={3} className="size-12 text-xl rounded-xl border" />
-              <InputOTPSlot index={4} className="size-12 text-xl rounded-xl border" />
-              <InputOTPSlot index={5} className="size-12 text-xl rounded-xl border" />
+              {Array.from({ length: 6 }, (_, i) => (
+                <InputOTPSlot key={i} index={i} className="size-12 text-xl rounded-xl border" />
+              ))}
             </InputOTPGroup>
           </InputOTP>
 
           {error && <p className="text-sm text-destructive">{error}</p>}
         </div>
 
-        <div className="flex flex-col gap-3 w-full max-w-65">
-          <Button variant="ghost" onClick={() => { setSubStep("phone"); setOtp(""); setError(""); }}>
-            Cambiar número
-          </Button>
-        </div>
+        <Button
+          variant="ghost"
+          className="w-full max-w-65"
+          onClick={() => { setSubStep("phone"); setOtp(""); setError(""); }}
+        >
+          Cambiar número
+        </Button>
       </div>
     );
   }
