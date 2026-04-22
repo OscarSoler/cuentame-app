@@ -92,7 +92,7 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="flex flex-col gap-5 px-5 pt-6 pb-4">
+    <div className="flex flex-col gap-5 px-5 pt-6 pb-4" style={{ background: "linear-gradient(to bottom, #2D501612 0%, #F5F0E8 180px)" }}>
 <BalanceHeader income={income} expenses={expenses} month={month} isBusiness={isBusiness} onMonthChange={setMonth} />
       <LedgerTabs active={activeLedger.type} onChange={handleLedgerChange} />
       <ScoreWidget ledgerType={activeLedger.type} />

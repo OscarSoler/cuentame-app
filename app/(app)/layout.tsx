@@ -9,7 +9,7 @@ export default function AppLayout({
   return (
     <LedgerProvider>
       <div className="flex flex-col h-dvh w-full">
-        <div className="flex-1 overflow-y-auto">{children}</div>
+        <div className="flex-1 overflow-y-auto" data-scroll-container>{children}</div>
         <BottomTabs />
       </div>
     </LedgerProvider>

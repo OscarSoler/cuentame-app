@@ -10,6 +10,9 @@ function fmt(n: number) {
   return `$${(n / 1000).toFixed(0)}k`;
 }
 
+// Mock — se reemplazará con datos reales del usuario
+const MOCK_NAME = "Oscar";
+
 interface BalanceHeaderProps {
   income: number;
   expenses: number;
@@ -19,17 +22,22 @@ interface BalanceHeaderProps {
 }
 
 export function BalanceHeader({ income, expenses, month, isBusiness, onMonthChange }: BalanceHeaderProps) {
+  const balance = income - expenses;
+
   return (
-    <div className="flex items-end justify-between">
+    <div className="flex items-center justify-between">
+      {/* Saludo + balance */}
       <div>
-        <p className="text-[10px] text-muted-foreground/70 uppercase tracking-widest mb-0.5">
-          {isBusiness ? "Flujo de caja" : "Tu balance"}
+        <p className="text-xl font-semibold leading-none mb-1.5">
+          Cuéntame, <span className="text-primary">{MOCK_NAME}</span>
         </p>
-        <h1 className="text-3xl font-semibold text-foreground tracking-tight">
-          {fmt(income - expenses)}
-        </h1>
+        <p className="text-sm text-muted-foreground/60 leading-none">
+          {fmt(balance)} este mes
+        </p>
       </div>
-      <div className="flex items-center gap-0.5 mb-1">
+
+      {/* Navegación de mes */}
+      <div className="flex items-center gap-0.5">
         <button
           type="button"
           onClick={() => onMonthChange(month > 0 ? month - 1 : 11)}

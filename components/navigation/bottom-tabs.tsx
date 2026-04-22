@@ -5,17 +5,20 @@ import { usePathname } from "next/navigation";
 import { HugeiconsIcon } from "@hugeicons/react";
 import type { IconSvgElement } from "@hugeicons/react";
 import { Home01Icon, Leaf01Icon, Cog } from "@hugeicons/core-free-icons";
+import { useEffect, useRef, useState } from "react";
 
 function TabLink({
   href,
   label,
   icon,
   isActive,
+  compact,
 }: {
   href: string;
   label: string;
   icon: IconSvgElement;
   isActive: boolean;
+  compact: boolean;
 }) {
   return (
     <Link
@@ -36,9 +39,9 @@ function TabLink({
         )}
       </div>
       <span
-        className={`text-[10px] transition-colors ${
+        className={`text-[10px] transition-all duration-300 overflow-hidden ${
           isActive ? "text-primary font-medium" : "text-muted-foreground/50"
-        }`}
+        } ${compact ? "max-h-0 opacity-0" : "max-h-4 opacity-100"}`}
       >
         {label}
       </span>
@@ -49,38 +52,73 @@ function TabLink({
 export function BottomTabs() {
   const pathname = usePathname();
   const isChatActive = pathname.startsWith("/chat");
+  const [compact, setCompact] = useState(false);
+  const lastScrollY = useRef(0);
+
+  useEffect(() => {
+    // El scroll está en el div padre con overflow-y-auto
+    const scrollContainer = document.querySelector<HTMLElement>(
+      "[data-scroll-container]"
+    );
+    if (!scrollContainer) return;
+
+    const onScroll = () => {
+      const current = scrollContainer.scrollTop;
+      const delta = current - lastScrollY.current;
+
+      if (delta > 4) {
+        setCompact(true);
+      } else if (delta < -4) {
+        setCompact(false);
+      }
+
+      lastScrollY.current = current;
+    };
+
+    scrollContainer.addEventListener("scroll", onScroll, { passive: true });
+    return () => scrollContainer.removeEventListener("scroll", onScroll);
+  }, []);
 
   return (
-    <nav className="relative border-t border-border/20 bg-[#FAF7F2]/80 backdrop-blur-xl pb-[env(safe-area-inset-bottom)]">
-      <div className="flex items-center justify-around px-2 h-14">
+    <nav
+      className={`relative border-t border-border/20 bg-[#FAF7F2]/80 backdrop-blur-xl pb-[env(safe-area-inset-bottom)] transition-all duration-300 ${
+        compact ? "h-10" : "h-14"
+      }`}
+    >
+      <div
+        className={`flex items-center justify-around px-2 transition-all duration-300 ${
+          compact ? "h-10" : "h-14"
+        }`}
+      >
         <TabLink
           href="/dashboard"
           label="Inicio"
           icon={Home01Icon}
           isActive={pathname.startsWith("/dashboard")}
+          compact={compact}
         />
         <Link
           href="/chat"
           className="flex flex-col items-center justify-center -mt-4"
         >
           <div
-            className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-md transition-all ${
+            className={`rounded-xl flex items-center justify-center shadow-md transition-all duration-300 ${
               isChatActive
                 ? "bg-primary shadow-primary/25 scale-105"
                 : "bg-primary/90 shadow-primary/15"
-            }`}
+            } ${compact ? "w-8 h-8" : "w-10 h-10"}`}
           >
             <HugeiconsIcon
               icon={Leaf01Icon}
-              size={18}
-              className="text-primary-foreground"
+              size={compact ? 15 : 18}
+              className="text-primary-foreground transition-all duration-300"
               strokeWidth={1.5}
             />
           </div>
           <span
-            className={`text-[10px] mt-0.5 transition-colors ${
+            className={`text-[10px] mt-0.5 transition-all duration-300 overflow-hidden ${
               isChatActive ? "text-primary font-medium" : "text-muted-foreground/60"
-            }`}
+            } ${compact ? "max-h-0 opacity-0" : "max-h-4 opacity-100"}`}
           >
             Cuéntame
           </span>
@@ -90,6 +128,7 @@ export function BottomTabs() {
           label="Ajustes"
           icon={Cog}
           isActive={pathname.startsWith("/profile")}
+          compact={compact}
         />
       </div>
     </nav>
