@@ -1,5 +1,7 @@
 export type TransactionType = "income" | "expense";
-export type TransactionPillar = "survival" | "optional" | "culture" | "extras";
+export type PersonalPillar = "survival" | "optional" | "culture" | "extras";
+export type BusinessPillar = "operacion" | "inversion" | "variable" | "imprevisto";
+export type TransactionPillar = PersonalPillar | BusinessPillar;
 export type TransactionEmotion = "happy" | "neutral" | "sad";
 export type TransactionTaxType = "iva" | "retefuente" | "ica";
 

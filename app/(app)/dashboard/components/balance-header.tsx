@@ -3,30 +3,32 @@
 import { HugeiconsIcon } from "@hugeicons/react";
 import { ArrowLeft01Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons";
 import { useSession } from "@/lib/auth-client";
-import { formatCurrencyCompact } from "@/lib/utils";
-
-const months = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
+import { MONTHS_ES_ABBR } from "@/lib/months";
 
 function firstName(fullName?: string | null) {
   return fullName?.trim().split(/\s+/)[0] ?? "";
 }
 
 interface BalanceHeaderProps {
-  income: number;
-  expenses: number;
   month: number;
-  isBusiness: boolean;
-  onMonthChange: (month: number) => void;
+  year: number;
+  onPeriodChange: (year: number, month: number) => void;
 }
 
-export function BalanceHeader({ income, expenses, month, isBusiness, onMonthChange }: BalanceHeaderProps) {
-  const balance = income - expenses;
+function shiftPeriod(year: number, month: number, delta: number) {
+  const total = year * 12 + month + delta;
+  return { year: Math.floor(total / 12), month: ((total % 12) + 12) % 12 };
+}
+
+export function BalanceHeader({ month, year, onPeriodChange }: BalanceHeaderProps) {
   const { data: session } = useSession();
   const displayName = firstName(session?.user.name);
 
+  const prev = shiftPeriod(year, month, -1);
+  const next = shiftPeriod(year, month, 1);
+
   return (
     <div className="flex items-center justify-between">
-      {/* Saludo + balance */}
       <div>
         <p className="font-accent text-xl font-semibold leading-none mb-1.5">
           {displayName ? (
@@ -36,25 +38,24 @@ export function BalanceHeader({ income, expenses, month, isBusiness, onMonthChan
           )}
         </p>
         <p className="text-sm text-muted-foreground/60 leading-none">
-          {formatCurrencyCompact(balance)} este mes
+          Tu {MONTHS_ES_ABBR[month].toLowerCase()}
         </p>
       </div>
 
-      {/* Navegación de mes */}
       <div className="flex items-center gap-0.5">
         <button
           type="button"
-          onClick={() => onMonthChange(month > 0 ? month - 1 : 11)}
+          onClick={() => onPeriodChange(prev.year, prev.month)}
           className="w-6 h-6 rounded-full flex items-center justify-center cursor-pointer hover:bg-accent/30 transition-colors"
         >
           <HugeiconsIcon icon={ArrowLeft01Icon} size={12} className="text-muted-foreground/70" />
         </button>
         <span className="text-[11px] font-medium text-muted-foreground min-w-14 text-center">
-          {months[month]} 2026
+          {MONTHS_ES_ABBR[month]} {year}
         </span>
         <button
           type="button"
-          onClick={() => onMonthChange(month < 11 ? month + 1 : 0)}
+          onClick={() => onPeriodChange(next.year, next.month)}
           className="w-6 h-6 rounded-full flex items-center justify-center cursor-pointer hover:bg-accent/30 transition-colors"
         >
           <HugeiconsIcon icon={ArrowRight01Icon} size={12} className="text-muted-foreground/70" />

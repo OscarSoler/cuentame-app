@@ -1,35 +1,23 @@
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { getUserLedgersAction } from "@/core/ledger/presentation/ledger.actions";
-import {
-  getMonthSummaryAction,
-  getPillarsSpentAction,
-  getRecentTransactionsAction,
-  getWeeklyTotalsAction,
-} from "@/core/transaction/presentation/transaction.actions";
-import type { LedgerType } from "@/lib/context/ledger-context";
-import { DashboardClient } from "./components/dashboard-client";
-import {
-  buildChartData,
-  buildPillars,
-  buildRecentTransactions,
-} from "./lib/presenters";
+import { isLedgerType } from "@/lib/ledger/types";
+import { DashboardShell } from "./components/dashboard-shell";
+import { SummarySection } from "./components/sections/summary-section";
+import { ChartSection } from "./components/sections/chart-section";
+import { PillarsSection } from "./components/sections/pillars-section";
+import { RecentSection } from "./components/sections/recent-section";
+import { SummarySkeleton } from "./components/skeletons/summary-skeleton";
+import { ChartSkeleton } from "./components/skeletons/chart-skeleton";
+import { PillarsSkeleton } from "./components/skeletons/pillars-skeleton";
+import { RecentSkeleton } from "./components/skeletons/recent-skeleton";
 
 interface DashboardPageProps {
   searchParams?: Promise<{
     ledger?: string;
     month?: string;
+    year?: string;
   }>;
-}
-
-function isLedgerType(value: string | undefined): value is LedgerType {
-  return value === "personal" || value === "business";
-}
-
-function unwrap<T, F>(
-  result: { success: true; data: T } | { success: false; error: string },
-  fallback: F,
-): T | F {
-  return result.success ? result.data : fallback;
 }
 
 export default async function DashboardPage({ searchParams }: DashboardPageProps) {
@@ -46,42 +34,55 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
     ledgers.find((l) => l.type === requestedType) ?? ledgers[0];
 
   const now = new Date();
-  const monthRaw = Number(params.month);
-  const month =
-    Number.isFinite(monthRaw) && monthRaw >= 0 && monthRaw <= 11
-      ? monthRaw
-      : now.getMonth();
-  const year = now.getFullYear();
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth();
 
-  const [summaryRes, pillarsRes, weeklyRes, recentRes] = await Promise.all([
-    getMonthSummaryAction(activeLedger.id, year, month + 1),
-    getPillarsSpentAction(activeLedger.id, year, month + 1),
-    getWeeklyTotalsAction(activeLedger.id, year, month + 1),
-    getRecentTransactionsAction(activeLedger.id, 6),
-  ]);
-
-  const summary = unwrap(summaryRes, { income: 0, expenses: 0 });
-  const pillarsSpent = unwrap(pillarsRes, []);
-  const weekly = unwrap(weeklyRes, []);
-  const recent = unwrap(recentRes, []);
-
-  const spentByKey: Record<string, number> = {};
-  for (const p of pillarsSpent) spentByKey[p.pillar] = p.spent;
+  const jsMonthRaw = Number(params.month);
+  const jsMonth =
+    Number.isFinite(jsMonthRaw) && jsMonthRaw >= 0 && jsMonthRaw <= 11
+      ? jsMonthRaw
+      : currentMonth;
+  const yearRaw = Number(params.year);
+  const year = Number.isFinite(yearRaw) && yearRaw >= 1970 ? yearRaw : currentYear;
+  const humanMonth = jsMonth + 1;
 
   const isBusiness = activeLedger.type === "business";
-  const hasAnySpent = Object.keys(spentByKey).length > 0;
+  const suspenseKey = `${activeLedger.id}-${year}-${jsMonth}`;
 
   return (
-    <DashboardClient
+    <DashboardShell
       ledgers={ledgers}
       activeLedger={activeLedger}
-      month={month}
-      currentMonth={now.getMonth()}
-      income={summary.income}
-      expenses={summary.expenses}
-      pillars={hasAnySpent ? buildPillars(isBusiness, spentByKey) : []}
-      chartData={buildChartData(weekly)}
-      transactions={buildRecentTransactions(recent)}
-    />
+      month={jsMonth}
+      year={year}
+      currentYear={currentYear}
+      currentMonth={currentMonth}
+    >
+      <Suspense key={`summary-${suspenseKey}`} fallback={<SummarySkeleton />}>
+        <SummarySection
+          ledgerId={activeLedger.id}
+          year={year}
+          month={humanMonth}
+          isBusiness={isBusiness}
+        />
+      </Suspense>
+
+      <Suspense key={`chart-${suspenseKey}`} fallback={<ChartSkeleton />}>
+        <ChartSection ledgerId={activeLedger.id} year={year} month={humanMonth} />
+      </Suspense>
+
+      <Suspense key={`pillars-${suspenseKey}`} fallback={<PillarsSkeleton />}>
+        <PillarsSection
+          ledgerId={activeLedger.id}
+          year={year}
+          month={humanMonth}
+          isBusiness={isBusiness}
+        />
+      </Suspense>
+
+      <Suspense key={`recent-${suspenseKey}`} fallback={<RecentSkeleton />}>
+        <RecentSection ledgerId={activeLedger.id} />
+      </Suspense>
+    </DashboardShell>
   );
 }

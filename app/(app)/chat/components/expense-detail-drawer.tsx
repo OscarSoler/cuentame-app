@@ -17,7 +17,8 @@ import {
   Delete02Icon,
 } from "@hugeicons/core-free-icons";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
-import { pillarConfig, type Pillar } from "./expense-card";
+import { PILLAR_META } from "@/lib/pillars";
+import type { TransactionPillar as Pillar } from "@/core/transaction/domain/transaction.entity";
 import { useLedger } from "@/lib/context/ledger-context";
 
 const personalPillarKeys: Pillar[] = ["survival", "optional", "culture", "extras"];
@@ -142,7 +143,7 @@ export function ExpenseDetailDrawer({
             </span>
             <div className="grid grid-cols-4 gap-2">
               {pillarKeys.map((key) => {
-                const p = pillarConfig[key];
+                const p = PILLAR_META[key];
                 return (
                   <button
                     key={key}

@@ -42,3 +42,14 @@ export async function wrapAction<T>(
     return { success: false, error: errorMessage(error) };
   }
 }
+
+/**
+ * Desenvuelve el resultado de un action y devuelve el `data` o el `fallback`
+ * si la acción falló. Complemento client-side de `wrapAction`.
+ */
+export function unwrap<T, F>(
+  result: { success: true; data: T } | { success: false; error: string },
+  fallback: F,
+): T | F {
+  return result.success ? result.data : fallback;
+}

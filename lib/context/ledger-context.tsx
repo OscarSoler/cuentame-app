@@ -1,14 +1,10 @@
 "use client";
 
 import { createContext, useContext, useState } from "react";
+import type { Ledger, LedgerType } from "@/lib/ledger/types";
 
-export type LedgerType = "personal" | "business";
-
-export interface Ledger {
-  id: string;
-  type: LedgerType;
-  name: string;
-}
+export type { Ledger, LedgerType } from "@/lib/ledger/types";
+export { isLedgerType } from "@/lib/ledger/types";
 
 interface LedgerContextValue {
   ledgers: Ledger[];

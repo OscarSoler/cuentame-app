@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { BottomTabs } from "@/components/navigation/bottom-tabs";
-import { LedgerProvider, type Ledger } from "@/lib/context/ledger-context";
+import { LedgerProvider } from "@/lib/context/ledger-context";
+import type { Ledger } from "@/lib/ledger/types";
 import { getUserLedgersAction } from "@/core/ledger/presentation/ledger.actions";
 
 export default async function AppLayout({

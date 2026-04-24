@@ -1,34 +1,13 @@
 "use client";
 
 import { HugeiconsIcon } from "@hugeicons/react";
-import {
-  CheckmarkCircle02Icon,
-  SparklesIcon,
-  FlowerPotIcon,
-  Book01Icon,
-  Coins01Icon,
-  Building01Icon,
-  ChartLineData01Icon,
-  Package01Icon,
-  Alert02Icon,
-} from "@hugeicons/core-free-icons";
+import { CheckmarkCircle02Icon } from "@hugeicons/core-free-icons";
 import { formatCurrency } from "@/lib/utils";
+import { PILLAR_META } from "@/lib/pillars";
+import type { TransactionPillar } from "@/core/transaction/domain/transaction.entity";
 import { ExpenseDetailDrawer } from "./expense-detail-drawer";
 
-export const pillarConfig = {
-  // Personal
-  survival: { label: "Supervivencia", icon: SparklesIcon },
-  optional: { label: "Opcional", icon: FlowerPotIcon },
-  culture: { label: "Cultura", icon: Book01Icon },
-  extras: { label: "Extras", icon: Coins01Icon },
-  // Business
-  operacion: { label: "Operación", icon: Building01Icon },
-  inversion: { label: "Inversión", icon: ChartLineData01Icon },
-  variable: { label: "Variable", icon: Package01Icon },
-  imprevisto: { label: "Imprevisto", icon: Alert02Icon },
-} as const;
-
-export type Pillar = keyof typeof pillarConfig;
+export type Pillar = TransactionPillar;
 
 interface ExpenseCardProps {
   amount: number;
@@ -45,7 +24,7 @@ export function ExpenseCard({
   pillar,
   date,
 }: ExpenseCardProps) {
-  const config = pillarConfig[pillar];
+  const config = PILLAR_META[pillar];
 
   return (
     <ExpenseDetailDrawer expense={{ amount, category, note, pillar, date }}>

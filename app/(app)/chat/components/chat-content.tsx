@@ -1,7 +1,10 @@
 "use client";
 
 import { useChat } from "@ai-sdk/react";
-import { DefaultChatTransport } from "ai";
+import {
+  DefaultChatTransport,
+  lastAssistantMessageIsCompleteWithToolCalls,
+} from "ai";
 import { useMemo } from "react";
 import { useLedger } from "@/lib/context/ledger-context";
 import { ChatSuggestions } from "./chat-suggestions";
@@ -24,7 +27,10 @@ export function ChatContent({ variant = "page" }: ChatContentProps) {
     [activeLedger.id, activeLedger.type],
   );
 
-  const { messages, sendMessage, addToolOutput, status } = useChat({ transport });
+  const { messages, sendMessage, addToolOutput, status } = useChat({
+    transport,
+    sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
+  });
 
   const isLoading = status === "streaming" || status === "submitted";
   const isDrawer = variant === "drawer";
