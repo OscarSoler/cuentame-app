@@ -2,7 +2,7 @@ export function WeeklyChartEmpty() {
   return (
     <div className="bg-white rounded-xl px-4 pt-3 pb-4 shadow-sm">
       <div className="flex items-center justify-between mb-3">
-        <span className="text-[9px] text-muted-foreground/70 uppercase tracking-wider">Este mes</span>
+        <span className="text-[9px] text-muted-foreground/70 uppercase tracking-wider">Últimos 7 días</span>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1">
             <div className="w-2 h-2 rounded-sm bg-primary/30" />
@@ -17,7 +17,7 @@ export function WeeklyChartEmpty() {
 
       <div className="flex items-center justify-center h-16">
         <span className="text-[11px] text-muted-foreground/60">
-          Aún no hay movimientos este mes
+          Aún no hay movimientos esta semana
         </span>
       </div>
     </div>

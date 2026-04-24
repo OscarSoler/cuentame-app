@@ -1,5 +1,6 @@
 import { Transaction } from "../domain/transaction.entity";
 import {
+  DailyTotal,
   MonthSummary,
   PillarSpent,
   TransactionRepository,
@@ -55,6 +56,12 @@ export class GetTransaction {
   ): Promise<WeeklyTotal[]> {
     this.assertMonth(year, month);
     return this.config.repository.getWeeklyTotalsByMonth(ledgerId, year, month);
+  }
+
+  async dailyTotalsLastNDays(ledgerId: string, days = 7): Promise<DailyTotal[]> {
+    if (!ledgerId?.trim()) throw new Error("El ledgerId es requerido");
+    if (days <= 0 || days > 90) throw new Error("days debe estar entre 1 y 90");
+    return this.config.repository.getDailyTotalsLastNDays(ledgerId, days);
   }
 
   private assertMonth(year: number, month: number): void {

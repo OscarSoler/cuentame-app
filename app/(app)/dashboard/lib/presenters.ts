@@ -74,3 +74,38 @@ export function buildChartData(
     }))
     .filter((w) => w.ingresos > 0 || w.gastos > 0);
 }
+
+const DAY_INITIALS_ES = ["D", "L", "M", "X", "J", "V", "S"] as const;
+
+export function buildDailyChartData(
+  daily: Array<{ date: string; income: number; expenses: number }>,
+  days = 7,
+): Array<{ name: string; ingresos: number; gastos: number; isToday: boolean }> {
+  const byDate = new Map(daily.map((d) => [d.date, d]));
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const todayKey = isoDate(today);
+
+  const result: Array<{ name: string; ingresos: number; gastos: number; isToday: boolean }> = [];
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    const key = isoDate(d);
+    const entry = byDate.get(key);
+    result.push({
+      name: DAY_INITIALS_ES[d.getDay()],
+      ingresos: entry?.income ?? 0,
+      gastos: entry?.expenses ?? 0,
+      isToday: key === todayKey,
+    });
+  }
+  return result;
+}
+
+function isoDate(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}

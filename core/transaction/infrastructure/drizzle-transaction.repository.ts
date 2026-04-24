@@ -10,6 +10,7 @@ import {
 } from "../domain/transaction.entity";
 import {
   CreateTransactionData,
+  DailyTotal,
   MonthSummary,
   PillarSpent,
   TransactionRepository,
@@ -173,6 +174,30 @@ export class DrizzleTransactionRepository implements TransactionRepository {
 
     return rows.map((r) => ({
       weekIndex: Number(r.weekIndex),
+      income: Number(r.income),
+      expenses: Number(r.expenses),
+    }));
+  }
+
+  async getDailyTotalsLastNDays(ledgerId: string, days: number): Promise<DailyTotal[]> {
+    const rows = await db
+      .select({
+        date: sql<string>`to_char(${transactions.date}, 'YYYY-MM-DD')`,
+        income: sql<string>`coalesce(sum(case when ${transactions.type} = 'income' then ${transactions.amount} else 0 end), 0)`,
+        expenses: sql<string>`coalesce(sum(case when ${transactions.type} = 'expense' then ${transactions.amount} else 0 end), 0)`,
+      })
+      .from(transactions)
+      .where(
+        and(
+          eq(transactions.ledgerId, ledgerId),
+          gte(transactions.date, sql`current_date - make_interval(days => ${days - 1})`),
+          lte(transactions.date, sql`current_date`),
+        ),
+      )
+      .groupBy(transactions.date);
+
+    return rows.map((r) => ({
+      date: r.date,
       income: Number(r.income),
       expenses: Number(r.expenses),
     }));

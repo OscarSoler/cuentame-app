@@ -23,6 +23,12 @@ export interface WeeklyTotal {
   expenses: number;
 }
 
+export interface DailyTotal {
+  date: string; // YYYY-MM-DD
+  income: number;
+  expenses: number;
+}
+
 export interface TransactionRepository {
   getById(id: string): Promise<Transaction | null>;
   getByLedgerId(ledgerId: string): Promise<Transaction[]>;
@@ -31,6 +37,7 @@ export interface TransactionRepository {
   getMonthSummary(ledgerId: string, year: number, month: number): Promise<MonthSummary>;
   getPillarsSpentByMonth(ledgerId: string, year: number, month: number): Promise<PillarSpent[]>;
   getWeeklyTotalsByMonth(ledgerId: string, year: number, month: number): Promise<WeeklyTotal[]>;
+  getDailyTotalsLastNDays(ledgerId: string, days: number): Promise<DailyTotal[]>;
   create(data: CreateTransactionData): Promise<Transaction>;
   update(id: string, data: UpdateTransactionData): Promise<Transaction>;
   delete(id: string): Promise<void>;

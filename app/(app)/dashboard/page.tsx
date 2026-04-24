@@ -67,8 +67,8 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
         />
       </Suspense>
 
-      <Suspense key={`chart-${suspenseKey}`} fallback={<ChartSkeleton />}>
-        <ChartSection ledgerId={activeLedger.id} year={year} month={humanMonth} />
+      <Suspense key={`chart-${activeLedger.id}`} fallback={<ChartSkeleton />}>
+        <ChartSection ledgerId={activeLedger.id} />
       </Suspense>
 
       <Suspense key={`pillars-${suspenseKey}`} fallback={<PillarsSkeleton />}>

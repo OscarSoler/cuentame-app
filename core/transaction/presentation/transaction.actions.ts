@@ -144,3 +144,10 @@ export async function getWeeklyTotalsAction(ledgerId: string, year: number, mont
     return useCases().get.weeklyTotalsByMonth(ledgerId, year, month);
   });
 }
+
+export async function getDailyTotalsAction(ledgerId: string, days = 7) {
+  return wrapAction(async () => {
+    await requireSession();
+    return useCases().get.dailyTotalsLastNDays(ledgerId, days);
+  });
+}
