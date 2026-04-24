@@ -1,3 +1,5 @@
+import { WeeklyChartEmpty } from "./weekly-chart-empty";
+
 interface WeekData {
   name: string;
   ingresos: number;
@@ -9,6 +11,10 @@ interface WeeklyChartProps {
 }
 
 export function WeeklyChart({ data }: WeeklyChartProps) {
+  if (data.length === 0) {
+    return <WeeklyChartEmpty />;
+  }
+
   const max = Math.max(...data.flatMap((d) => [d.ingresos, d.gastos]));
   const H = 72;
 

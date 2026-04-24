@@ -1,5 +1,6 @@
 import { HugeiconsIcon } from "@hugeicons/react";
 import type { IconSvgElement } from "@hugeicons/react";
+import { PillarsRowEmpty } from "./pillars-row-empty";
 
 function fmt(n: number) {
   if (n >= 1000000) return `$${(n / 1000000).toFixed(1)}M`;
@@ -21,6 +22,10 @@ interface PillarsRowProps {
 }
 
 export function PillarsRow({ pillars, isBusiness }: PillarsRowProps) {
+  if (pillars.length === 0) {
+    return <PillarsRowEmpty isBusiness={isBusiness} />;
+  }
+
   return (
     <div>
       <h2 className="text-[11px] font-medium text-muted-foreground/60 uppercase tracking-wider mb-3">

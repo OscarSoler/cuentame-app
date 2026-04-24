@@ -1,6 +1,7 @@
 import { HugeiconsIcon } from "@hugeicons/react";
 import type { IconSvgElement } from "@hugeicons/react";
 import { Coins01Icon } from "@hugeicons/core-free-icons";
+import { RecentTransactionsEmpty } from "./recent-transactions-empty";
 
 function fmt(n: number) {
   return `$${n.toLocaleString()}`;
@@ -22,6 +23,10 @@ interface RecentTransactionsProps {
 }
 
 export function RecentTransactions({ transactions, categoryIcons }: RecentTransactionsProps) {
+  if (transactions.length === 0) {
+    return <RecentTransactionsEmpty />;
+  }
+
   return (
     <div>
       <h2 className="text-[11px] font-medium text-muted-foreground/60 uppercase tracking-wider mb-3">
