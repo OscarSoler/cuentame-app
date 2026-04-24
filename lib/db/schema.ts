@@ -8,7 +8,9 @@ import {
   date,
   integer,
   boolean,
+  jsonb,
   uniqueIndex,
+  index,
 } from "drizzle-orm/pg-core";
 import { users } from "./auth-schema";
 import { sql } from "drizzle-orm";
@@ -110,4 +112,38 @@ export const reflections = pgTable(
       t.month
     ),
   ]
+);
+
+// ─── Conversations ───────────────────────────────────────
+export const conversations = pgTable(
+  "conversations",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    ledgerId: uuid("ledger_id")
+      .notNull()
+      .references(() => ledgers.id, { onDelete: "cascade" }),
+    title: varchar("title"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [index("conversations_ledger_idx").on(t.ledgerId, t.updatedAt)]
+);
+
+// ─── Messages ────────────────────────────────────────────
+export const messages = pgTable(
+  "messages",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .default(sql`gen_random_uuid()`),
+    conversationId: uuid("conversation_id")
+      .notNull()
+      .references(() => conversations.id, { onDelete: "cascade" }),
+    role: varchar("role").notNull(), // user | assistant | system
+    parts: jsonb("parts").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [index("messages_conversation_idx").on(t.conversationId, t.createdAt)]
 );

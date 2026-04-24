@@ -27,11 +27,12 @@ export function PhoneAuthForm({ onVerified }: PhoneAuthFormProps) {
   const handleSendOtp = async () => {
     if (loading) return;
     setError("");
-    const normalized = phone.startsWith("+") ? phone : `+${phone}`;
-    if (normalized.length < 8) {
+    const digitsOnly = phone.replace(/\D/g, "");
+    if (digitsOnly.length < 7) {
       setError("Ingresa un número válido con código de país");
       return;
     }
+    const normalized = `+${digitsOnly}`;
     setLoading(true);
     const { error: err } = await authClient.phoneNumber.sendOtp({
       phoneNumber: normalized,
@@ -49,17 +50,25 @@ export function PhoneAuthForm({ onVerified }: PhoneAuthFormProps) {
     if (loading) return;
     setError("");
     setLoading(true);
-    const { error: err } = await authClient.phoneNumber.verify({
-      phoneNumber: phone,
-      code,
-    });
-    if (err) {
+    try {
+      const { error: err } = await authClient.phoneNumber.verify({
+        phoneNumber: phone,
+        code,
+      });
+      if (err) {
+        console.error("[phone verify] error:", err);
+        setLoading(false);
+        setError(err.message === "Invalid OTP" ? "Código incorrecto o expirado" : err.message ?? "Código incorrecto");
+        setOtp("");
+        return;
+      }
+      await onVerified();
+    } catch (e) {
+      console.error("[phone verify] threw:", e);
       setLoading(false);
-      setError(err.message ?? "Código incorrecto");
+      setError(e instanceof Error ? e.message : "Error al verificar");
       setOtp("");
-      return;
     }
-    await onVerified();
   };
 
   const handleOtpChange = (val: string) => {
