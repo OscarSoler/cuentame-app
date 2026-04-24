@@ -1,11 +1,8 @@
 import { HugeiconsIcon } from "@hugeicons/react";
 import type { IconSvgElement } from "@hugeicons/react";
 import { Coins01Icon } from "@hugeicons/core-free-icons";
+import { formatCurrency } from "@/lib/utils";
 import { RecentTransactionsEmpty } from "./recent-transactions-empty";
-
-function fmt(n: number) {
-  return `$${n.toLocaleString()}`;
-}
 
 export interface TransactionData {
   id: string;
@@ -17,12 +14,15 @@ export interface TransactionData {
   type: "income" | "expense";
 }
 
+const categoryIcons: Record<string, IconSvgElement> = {
+  otros: Coins01Icon,
+};
+
 interface RecentTransactionsProps {
   transactions: TransactionData[];
-  categoryIcons: Record<string, IconSvgElement>;
 }
 
-export function RecentTransactions({ transactions, categoryIcons }: RecentTransactionsProps) {
+export function RecentTransactions({ transactions }: RecentTransactionsProps) {
   if (transactions.length === 0) {
     return <RecentTransactionsEmpty />;
   }
@@ -47,7 +47,7 @@ export function RecentTransactions({ transactions, categoryIcons }: RecentTransa
               </div>
               <div className="text-right shrink-0">
                 <span className={`text-[12px] font-semibold block ${isIncome ? "text-primary" : "text-foreground"}`}>
-                  {isIncome ? "+" : "-"}{fmt(tx.amount)}
+                  {isIncome ? "+" : "-"}{formatCurrency(tx.amount)}
                 </span>
                 <span className="text-xs">{tx.emoji}</span>
               </div>

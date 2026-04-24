@@ -3,13 +3,9 @@
 import { HugeiconsIcon } from "@hugeicons/react";
 import { ArrowLeft01Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons";
 import { useSession } from "@/lib/auth-client";
+import { formatCurrencyCompact } from "@/lib/utils";
 
 const months = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
-
-function fmt(n: number) {
-  if (n >= 1000000) return `$${(n / 1000000).toFixed(1)}M`;
-  return `$${(n / 1000).toFixed(0)}k`;
-}
 
 function firstName(fullName?: string | null) {
   return fullName?.trim().split(/\s+/)[0] ?? "";
@@ -40,7 +36,7 @@ export function BalanceHeader({ income, expenses, month, isBusiness, onMonthChan
           )}
         </p>
         <p className="text-sm text-muted-foreground/60 leading-none">
-          {fmt(balance)} este mes
+          {formatCurrencyCompact(balance)} este mes
         </p>
       </div>
 

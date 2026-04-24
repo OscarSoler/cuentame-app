@@ -4,38 +4,47 @@ import { createContext, useContext, useState } from "react";
 
 export type LedgerType = "personal" | "business";
 
-interface Ledger {
+export interface Ledger {
   id: string;
   type: LedgerType;
   name: string;
 }
 
 interface LedgerContextValue {
+  ledgers: Ledger[];
   activeLedger: Ledger;
-  setActiveLedger: (ledger: Ledger) => void;
+  switchType: (type: LedgerType) => void;
 }
 
-const defaultLedger: Ledger = {
-  id: "personal-default",
-  type: "personal",
-  name: "Personal",
-};
+const LedgerContext = createContext<LedgerContextValue | null>(null);
 
-const LedgerContext = createContext<LedgerContextValue>({
-  activeLedger: defaultLedger,
-  setActiveLedger: () => {},
-});
+interface LedgerProviderProps {
+  ledgers: Ledger[];
+  initialLedger: Ledger;
+  children: React.ReactNode;
+}
 
-export function LedgerProvider({ children }: { children: React.ReactNode }) {
-  const [activeLedger, setActiveLedger] = useState<Ledger>(defaultLedger);
+export function LedgerProvider({
+  ledgers,
+  initialLedger,
+  children,
+}: LedgerProviderProps) {
+  const [activeLedger, setActiveLedger] = useState<Ledger>(initialLedger);
+
+  const switchType = (type: LedgerType) => {
+    const next = ledgers.find((l) => l.type === type);
+    if (next && next.id !== activeLedger.id) setActiveLedger(next);
+  };
 
   return (
-    <LedgerContext.Provider value={{ activeLedger, setActiveLedger }}>
+    <LedgerContext.Provider value={{ ledgers, activeLedger, switchType }}>
       {children}
     </LedgerContext.Provider>
   );
 }
 
 export function useLedger() {
-  return useContext(LedgerContext);
+  const ctx = useContext(LedgerContext);
+  if (!ctx) throw new Error("useLedger debe usarse dentro de LedgerProvider");
+  return ctx;
 }

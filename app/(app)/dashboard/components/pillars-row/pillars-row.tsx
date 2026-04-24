@@ -1,11 +1,7 @@
 import { HugeiconsIcon } from "@hugeicons/react";
 import type { IconSvgElement } from "@hugeicons/react";
+import { formatCurrencyCompact } from "@/lib/utils";
 import { PillarsRowEmpty } from "./pillars-row-empty";
-
-function fmt(n: number) {
-  if (n >= 1000000) return `$${(n / 1000000).toFixed(1)}M`;
-  return `$${(n / 1000).toFixed(0)}k`;
-}
 
 export interface PillarData {
   key: string;
@@ -33,8 +29,10 @@ export function PillarsRow({ pillars, isBusiness }: PillarsRowProps) {
       </h2>
       <div className="grid grid-cols-4 gap-2.5">
         {pillars.map((p) => {
-          const percent = Math.min(Math.round((p.spent / p.budget) * 100), 100);
-          const over = p.spent > p.budget;
+          const percent = p.budget > 0
+            ? Math.min(Math.round((p.spent / p.budget) * 100), 100)
+            : 0;
+          const over = p.budget > 0 && p.spent > p.budget;
           return (
             <div key={p.key} className="flex flex-col items-center gap-2 bg-white rounded-xl px-2 pt-3 pb-2.5 shadow-sm">
               <div className="relative w-14 h-14">
@@ -53,7 +51,7 @@ export function PillarsRow({ pillars, isBusiness }: PillarsRowProps) {
               </div>
               <div className="text-center">
                 <span className="text-[10px] font-medium text-foreground/70 block leading-none">{p.label}</span>
-                <span className="text-[9px] text-muted-foreground/50 mt-0.5 block">{fmt(p.spent)}</span>
+                <span className="text-[9px] text-muted-foreground/50 mt-0.5 block">{formatCurrencyCompact(p.spent)}</span>
               </div>
             </div>
           );

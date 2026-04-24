@@ -2,6 +2,7 @@
 
 import { HugeiconsIcon } from "@hugeicons/react";
 import { ArrowDown01Icon } from "@hugeicons/core-free-icons";
+import { formatCurrency } from "@/lib/utils";
 
 const categoryLabels: Record<string, string> = {
   ventas: "Ventas",
@@ -46,7 +47,7 @@ export function IncomeCard({
 
       <div className="mb-1.5">
         <span className="text-xl font-semibold text-primary">
-          +${amount.toLocaleString()}
+          +{formatCurrency(amount)}
         </span>
       </div>
 
@@ -63,7 +64,7 @@ export function IncomeCard({
         {ivaAmount > 0 && (
           <div className="bg-muted/60 rounded-full px-2 py-0.5">
             <span className="text-[10px] text-muted-foreground">
-              IVA ${ivaAmount.toLocaleString()}
+              IVA {formatCurrency(ivaAmount)}
             </span>
           </div>
         )}

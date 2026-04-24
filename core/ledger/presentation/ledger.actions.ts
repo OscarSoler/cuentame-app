@@ -1,32 +1,20 @@
 "use server";
 
-import { auth } from "@/app/lib/auth";
-import { headers } from "next/headers";
+import { cache } from "react";
+import { requireSession, wrapAction } from "@/core/_shared/action";
 import { DrizzleLedgerRepository } from "../infrastructure/drizzle-ledger.repository";
 import { GetLedger } from "../application/get-ledger";
 import { CreateLedger } from "../application/create-ledger";
 
-function repo() {
-  return new DrizzleLedgerRepository();
-}
+const loadUserLedgers = cache(async () => {
+  const session = await requireSession();
+  const getLedger = new GetLedger({ repository: new DrizzleLedgerRepository() });
+  const ledgers = await getLedger.byUserId(session.user.id);
+  return ledgers.map((l) => ({ id: l.id, type: l.type, name: l.name }));
+});
 
 export async function getUserLedgersAction() {
-  try {
-    const h = await headers();
-    const session = await auth.api.getSession({ headers: h });
-
-    if (!session) return { success: false, error: "No autenticado" };
-
-    const getLedger = new GetLedger({ repository: repo() });
-    const ledgers = await getLedger.byUserId(session.user.id);
-
-    return { success: true, data: ledgers.map((l) => ({ id: l.id })) };
-  } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : String(error),
-    };
-  }
+  return wrapAction(loadUserLedgers);
 }
 
 interface CreateLedgerInput {
@@ -37,13 +25,9 @@ interface CreateLedgerInput {
 }
 
 export async function createLedgerAction(input: CreateLedgerInput) {
-  try {
-    const h = await headers();
-    const session = await auth.api.getSession({ headers: h });
-
-    if (!session) return { success: false, error: "No autenticado" };
-
-    const createLedger = new CreateLedger({ repository: repo() });
+  return wrapAction(async () => {
+    const session = await requireSession();
+    const createLedger = new CreateLedger({ repository: new DrizzleLedgerRepository() });
     const ledger = await createLedger.execute({
       userId: session.user.id,
       name: input.name,
@@ -51,12 +35,6 @@ export async function createLedgerAction(input: CreateLedgerInput) {
       businessName: input.businessName ?? null,
       businessType: input.businessType ?? null,
     });
-
-    return { success: true, data: { id: ledger.id } };
-  } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : String(error),
-    };
-  }
+    return { id: ledger.id };
+  });
 }

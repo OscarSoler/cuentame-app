@@ -1,96 +1,87 @@
-"use client";
-
-import { useState } from "react";
-import { HugeiconsIcon } from "@hugeicons/react";
-import type { IconSvgElement } from "@hugeicons/react";
-import { ArrowUp01Icon, ArrowDown01Icon } from "@hugeicons/core-free-icons";
-import { useLedger, type LedgerType } from "@/lib/context/ledger-context";
-import { BalanceHeader } from "./components/balance-header";
-import { LedgerTabs } from "./components/ledger-tabs";
-import { ScoreWidget } from "./components/score-widget";
-import { WeeklyChart } from "./components/weekly-chart";
-import { PillarsRow, type PillarData } from "./components/pillars-row";
+import { redirect } from "next/navigation";
+import { getUserLedgersAction } from "@/core/ledger/presentation/ledger.actions";
 import {
-  RecentTransactions,
-  type TransactionData,
-} from "./components/recent-transactions";
+  getMonthSummaryAction,
+  getPillarsSpentAction,
+  getRecentTransactionsAction,
+  getWeeklyTotalsAction,
+} from "@/core/transaction/presentation/transaction.actions";
+import type { LedgerType } from "@/lib/context/ledger-context";
+import { DashboardClient } from "./components/dashboard-client";
+import {
+  buildChartData,
+  buildPillars,
+  buildRecentTransactions,
+} from "./lib/presenters";
 
-export default function DashboardPage() {
-  const [month, setMonth] = useState(3);
-  const { activeLedger, setActiveLedger } = useLedger();
+interface DashboardPageProps {
+  searchParams?: Promise<{
+    ledger?: string;
+    month?: string;
+  }>;
+}
+
+function isLedgerType(value: string | undefined): value is LedgerType {
+  return value === "personal" || value === "business";
+}
+
+function unwrap<T, F>(
+  result: { success: true; data: T } | { success: false; error: string },
+  fallback: F,
+): T | F {
+  return result.success ? result.data : fallback;
+}
+
+export default async function DashboardPage({ searchParams }: DashboardPageProps) {
+  const params = (await searchParams) ?? {};
+
+  const ledgersResult = await getUserLedgersAction();
+  if (!ledgersResult.success || ledgersResult.data.length === 0) {
+    redirect("/");
+  }
+  const ledgers = ledgersResult.data;
+
+  const requestedType = isLedgerType(params.ledger) ? params.ledger : "personal";
+  const activeLedger =
+    ledgers.find((l) => l.type === requestedType) ?? ledgers[0];
+
+  const now = new Date();
+  const monthRaw = Number(params.month);
+  const month =
+    Number.isFinite(monthRaw) && monthRaw >= 0 && monthRaw <= 11
+      ? monthRaw
+      : now.getMonth();
+  const year = now.getFullYear();
+
+  const [summaryRes, pillarsRes, weeklyRes, recentRes] = await Promise.all([
+    getMonthSummaryAction(activeLedger.id, year, month + 1),
+    getPillarsSpentAction(activeLedger.id, year, month + 1),
+    getWeeklyTotalsAction(activeLedger.id, year, month + 1),
+    getRecentTransactionsAction(activeLedger.id, 6),
+  ]);
+
+  const summary = unwrap(summaryRes, { income: 0, expenses: 0 });
+  const pillarsSpent = unwrap(pillarsRes, []);
+  const weekly = unwrap(weeklyRes, []);
+  const recent = unwrap(recentRes, []);
+
+  const spentByKey: Record<string, number> = {};
+  for (const p of pillarsSpent) spentByKey[p.pillar] = p.spent;
 
   const isBusiness = activeLedger.type === "business";
-  const income = 0;
-  const expenses = 0;
-  const chartData: { name: string; ingresos: number; gastos: number }[] = [];
-  const pillars: PillarData[] = [];
-  const transactions: TransactionData[] = [];
-  const categoryIcons: Record<string, IconSvgElement> = {};
-
-  const handleLedgerChange = (type: LedgerType) => {
-    setActiveLedger({
-      id: `${type}-default`,
-      type,
-      name: type === "business" ? "Negocio" : "Personal",
-    });
-  };
+  const hasAnySpent = Object.keys(spentByKey).length > 0;
 
   return (
-    <div className="flex flex-col gap-5 px-5 pt-6 pb-4">
-      <BalanceHeader
-        income={income}
-        expenses={expenses}
-        month={month}
-        isBusiness={isBusiness}
-        onMonthChange={setMonth}
-      />
-      <LedgerTabs active={activeLedger.type} onChange={handleLedgerChange} />
-      <ScoreWidget ledgerType={activeLedger.type} />
-
-      {/* Income / Expense summary */}
-      <div className="flex gap-2.5">
-        <div className="flex items-center gap-2.5 flex-1 bg-white rounded-xl px-3.5 py-3 shadow-sm">
-          <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-            <HugeiconsIcon
-              icon={ArrowDown01Icon}
-              size={12}
-              className="text-primary"
-            />
-          </div>
-          <div>
-            <span className="text-[9px] text-muted-foreground/70 block leading-none">
-              Ingresos
-            </span>
-            <span className="text-sm font-semibold text-foreground">
-              ${(income / 1000000).toFixed(1)}M
-            </span>
-          </div>
-        </div>
-        <div className="flex items-center gap-2.5 flex-1 bg-white rounded-xl px-3.5 py-3 shadow-sm">
-          <div className="w-7 h-7 rounded-full bg-destructive/10 flex items-center justify-center shrink-0">
-            <HugeiconsIcon
-              icon={ArrowUp01Icon}
-              size={12}
-              className="text-destructive/70"
-            />
-          </div>
-          <div>
-            <span className="text-[9px] text-muted-foreground/70 block leading-none">
-              {isBusiness ? "Egresos" : "Gastos"}
-            </span>
-            <span className="text-sm font-semibold text-foreground">
-              ${(expenses / 1000000).toFixed(1)}M
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <WeeklyChart data={chartData} />
-      <PillarsRow pillars={pillars} isBusiness={isBusiness} />
-      <RecentTransactions
-        transactions={transactions}
-        categoryIcons={categoryIcons}
-      />
-    </div>
+    <DashboardClient
+      ledgers={ledgers}
+      activeLedger={activeLedger}
+      month={month}
+      currentMonth={now.getMonth()}
+      income={summary.income}
+      expenses={summary.expenses}
+      pillars={hasAnySpent ? buildPillars(isBusiness, spentByKey) : []}
+      chartData={buildChartData(weekly)}
+      transactions={buildRecentTransactions(recent)}
+    />
   );
 }

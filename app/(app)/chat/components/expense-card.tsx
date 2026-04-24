@@ -12,6 +12,7 @@ import {
   Package01Icon,
   Alert02Icon,
 } from "@hugeicons/core-free-icons";
+import { formatCurrency } from "@/lib/utils";
 import { ExpenseDetailDrawer } from "./expense-detail-drawer";
 
 export const pillarConfig = {
@@ -72,7 +73,7 @@ export function ExpenseCard({
 
         <div className="mb-1.5">
           <span className="text-xl font-semibold text-foreground">
-            ${amount.toLocaleString()}
+            {formatCurrency(amount)}
           </span>
         </div>
 
