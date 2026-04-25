@@ -5,6 +5,7 @@ import { DrizzleTransactionRepository } from "../infrastructure/drizzle-transact
 import {
   CreateTransaction,
   DeleteTransaction,
+  GetActivityStats,
   GetTransaction,
   UpdateTransaction,
 } from "../application";
@@ -24,6 +25,7 @@ function useCases() {
     create: new CreateTransaction({ repository }),
     update: new UpdateTransaction({ repository }),
     delete: new DeleteTransaction({ repository }),
+    activityStats: new GetActivityStats({ repository }),
   };
 }
 
@@ -156,5 +158,17 @@ export async function getDailyTotalsAction(ledgerId: string, days = 7) {
   return wrapAction(async () => {
     await requireSession();
     return useCases().get.dailyTotalsLastNDays(ledgerId, days);
+  });
+}
+
+export async function getActivityStatsAction(ledgerId: string) {
+  return wrapAction(async () => {
+    await requireSession();
+    const stats = await useCases().activityStats.byLedger(ledgerId);
+    return {
+      score: stats.score,
+      currentStreak: stats.currentStreak,
+      activeDaysThisWeek: stats.activeDaysThisWeek,
+    };
   });
 }

@@ -5,7 +5,6 @@ import type { Ledger, LedgerType } from "@/lib/context/ledger-context";
 import { setStoredLedgerType } from "@/lib/ledger/preference";
 import { BalanceHeader } from "./balance-header";
 import { LedgerTabs } from "./ledger-tabs";
-import { ScoreWidget } from "./score-widget";
 
 interface DashboardShellProps {
   ledgers: Ledger[];
@@ -64,7 +63,6 @@ export function DashboardShell({
         onChange={handleLedgerChange}
         availableTypes={ledgers.map((l) => l.type)}
       />
-      <ScoreWidget ledgerType={activeLedger.type} />
       {children}
     </div>
   );

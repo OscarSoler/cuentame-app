@@ -38,6 +38,8 @@ export interface TransactionRepository {
   getPillarsSpentByMonth(ledgerId: string, year: number, month: number): Promise<PillarSpent[]>;
   getWeeklyTotalsByMonth(ledgerId: string, year: number, month: number): Promise<WeeklyTotal[]>;
   getDailyTotalsLastNDays(ledgerId: string, days: number): Promise<DailyTotal[]>;
+  getActiveDates(ledgerId: string, sinceDays: number): Promise<string[]>;
+  getCount(ledgerId: string): Promise<number>;
   create(data: CreateTransactionData): Promise<Transaction>;
   update(id: string, data: UpdateTransactionData): Promise<Transaction>;
   delete(id: string): Promise<void>;

@@ -4,10 +4,12 @@ import { getUserLedgersAction } from "@/core/ledger/presentation/ledger.actions"
 import { isLedgerType } from "@/lib/ledger/types";
 import { readStoredLedgerType } from "@/lib/ledger/preference.server";
 import { DashboardShell } from "./components/dashboard-shell";
+import { ScoreSection } from "./components/sections/score-section";
 import { SummarySection } from "./components/sections/summary-section";
 import { ChartSection } from "./components/sections/chart-section";
 import { PillarsSection } from "./components/sections/pillars-section";
 import { RecentSection } from "./components/sections/recent-section";
+import { ScoreSkeleton } from "./components/skeletons/score-skeleton";
 import { SummarySkeleton } from "./components/skeletons/summary-skeleton";
 import { ChartSkeleton } from "./components/skeletons/chart-skeleton";
 import { PillarsSkeleton } from "./components/skeletons/pillars-skeleton";
@@ -62,6 +64,10 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
       currentYear={currentYear}
       currentMonth={currentMonth}
     >
+      <Suspense key={`score-${activeLedger.id}`} fallback={<ScoreSkeleton />}>
+        <ScoreSection ledgerId={activeLedger.id} ledgerType={activeLedger.type} />
+      </Suspense>
+
       <Suspense key={`summary-${suspenseKey}`} fallback={<SummarySkeleton />}>
         <SummarySection
           ledgerId={activeLedger.id}

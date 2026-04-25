@@ -203,6 +203,33 @@ export class DrizzleTransactionRepository implements TransactionRepository {
     }));
   }
 
+  async getActiveDates(ledgerId: string, sinceDays: number): Promise<string[]> {
+    const rows = await db
+      .selectDistinct({
+        date: sql<string>`to_char(${transactions.date}, 'YYYY-MM-DD')`,
+      })
+      .from(transactions)
+      .where(
+        and(
+          eq(transactions.ledgerId, ledgerId),
+          gte(transactions.date, sql`current_date - make_interval(days => ${sinceDays - 1})`),
+          lte(transactions.date, sql`current_date`),
+        ),
+      )
+      .orderBy(sql`1 desc`);
+
+    return rows.map((r) => r.date);
+  }
+
+  async getCount(ledgerId: string): Promise<number> {
+    const [row] = await db
+      .select({ count: sql<string>`count(*)` })
+      .from(transactions)
+      .where(eq(transactions.ledgerId, ledgerId));
+
+    return Number(row?.count ?? 0);
+  }
+
   async create(data: CreateTransactionData): Promise<Transaction> {
     const [row] = await db
       .insert(transactions)
