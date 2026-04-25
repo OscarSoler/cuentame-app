@@ -4,9 +4,10 @@ import { createTransactionAction } from "@/core/transaction/presentation/transac
 
 interface ToolContext {
   ledgerId: string;
+  ledgerType: "personal" | "business";
 }
 
-export function buildChatTools({ ledgerId }: ToolContext) {
+export function buildChatTools({ ledgerId, ledgerType }: ToolContext) {
   const registerExpense = tool({
     description:
       "Registra un gasto/egreso. Extrae monto, categoría, nota y pilar del contexto. Para personal: survival, optional, culture, extras. Para negocio: operacion, inversion, variable, imprevisto.",
@@ -66,7 +67,8 @@ export function buildChatTools({ ledgerId }: ToolContext) {
     }),
     execute: async ({ amount, category, note, includesIva }) => {
       const today = new Date().toISOString().split("T")[0];
-      const ivaAmount = includesIva ? Math.round((amount * 19) / 119) : 0;
+      const applyIva = ledgerType === "business" && includesIva;
+      const ivaAmount = applyIva ? Math.round((amount * 19) / 119) : 0;
 
       const result = await createTransactionAction({
         ledgerId,
@@ -75,8 +77,8 @@ export function buildChatTools({ ledgerId }: ToolContext) {
         date: today,
         category,
         note,
-        taxType: includesIva ? "iva" : null,
-        taxAmount: includesIva ? ivaAmount : null,
+        taxType: applyIva ? "iva" : null,
+        taxAmount: applyIva ? ivaAmount : null,
       });
 
       if (!result.success) {

@@ -10,54 +10,68 @@ import {
 import type { StepProps } from "./types";
 
 const pillars = [
-  { icon: SparklesIcon, pillar: "Supervivencia", desc: "Lo esencial" },
-  { icon: FlowerPotIcon, pillar: "Opcional", desc: "Gustos y caprichos" },
-  { icon: Book01Icon, pillar: "Cultura", desc: "Crecimiento personal" },
-  { icon: Coins01Icon, pillar: "Extras", desc: "Lo inesperado" },
+  { icon: SparklesIcon, pillar: "Supervivencia", desc: "Lo esencial", color: "#2D5016" },
+  { icon: FlowerPotIcon, pillar: "Opcional", desc: "Gustos y caprichos", color: "#8B9E7C" },
+  { icon: Book01Icon, pillar: "Cultura", desc: "Crecimiento personal", color: "#D4A574" },
+  { icon: Coins01Icon, pillar: "Extras", desc: "Lo inesperado", color: "#A67B5B" },
 ];
 
 export function PhilosophyStep({ onNext }: StepProps) {
   return (
-    <div className="flex flex-col items-center text-center flex-1 justify-between py-10 px-6">
+    <div className="flex flex-col items-center text-center flex-1 justify-between py-12 px-6">
       <div className="text-[10px] tracking-[0.25em] uppercase text-muted-foreground/70">
         Filosofía Kakebo
       </div>
 
-      <div className="flex flex-col items-center gap-5">
-        <div className="w-14 h-14 rounded-full bg-accent/40 flex items-center justify-center">
-          <HugeiconsIcon icon={Yoga01Icon} size={28} className="text-primary" strokeWidth={1.5} />
+      <div className="flex flex-col items-center gap-7 w-full">
+        <div className="relative w-20 h-20 flex items-center justify-center">
+          <div className="absolute inset-0 rounded-full bg-primary/10 blur-xl" />
+          <div className="relative w-18 h-18 rounded-full bg-accent/40 flex items-center justify-center shadow-[0_4px_20px_rgba(45,80,22,0.12)]">
+            <HugeiconsIcon icon={Yoga01Icon} size={36} className="text-primary" strokeWidth={1.5} />
+          </div>
         </div>
 
-        <h2 className="font-heading text-2xl leading-snug text-foreground">
-          El método Kakebo
-          <br />
-          nació en Japón en 1904
-        </h2>
+        <div className="flex flex-col gap-3">
+          <h2 className="font-heading text-3xl leading-tight text-foreground">
+            El método Kakebo
+            <br />
+            <span className="text-primary">nació en Japón en 1904</span>
+          </h2>
 
-        <p className="text-muted-foreground text-sm max-w-65 leading-relaxed">
-          Un diario financiero que te invita a reflexionar sobre cada gasto y
-          entender tu relación con el dinero.
-        </p>
+          <p className="text-muted-foreground text-base max-w-72 leading-relaxed">
+            Un diario financiero que te invita a reflexionar sobre cada gasto y entender tu relación con el dinero.
+          </p>
+        </div>
 
-        <div className="flex flex-col gap-2 w-full max-w-65">
+        <div className="grid grid-cols-2 gap-2.5 w-full max-w-80">
           {pillars.map((item) => (
             <div
               key={item.pillar}
-              className="flex items-center gap-2.5 bg-card/60 backdrop-blur-sm rounded-lg px-3 py-2.5 text-left"
+              className="relative overflow-hidden flex flex-col items-start gap-2 bg-white/70 backdrop-blur-sm rounded-2xl px-3.5 py-3 text-left border border-border/15 shadow-[0_1px_3px_rgba(45,80,22,0.04)]"
             >
-              <div className="w-7 h-7 rounded-md bg-accent/50 flex items-center justify-center shrink-0">
-                <HugeiconsIcon icon={item.icon} size={14} className="text-primary" strokeWidth={1.5} />
+              <span
+                className="absolute -top-6 -right-6 w-16 h-16 rounded-full opacity-15 blur-xl"
+                style={{ backgroundColor: item.color }}
+              />
+              <div
+                className="relative w-9 h-9 rounded-xl flex items-center justify-center"
+                style={{
+                  backgroundColor: `${item.color}1f`,
+                  boxShadow: `0 2px 6px ${item.color}1a`,
+                }}
+              >
+                <HugeiconsIcon icon={item.icon} size={16} style={{ color: item.color }} strokeWidth={1.75} />
               </div>
-              <div>
-                <div className="text-xs font-medium text-foreground">{item.pillar}</div>
-                <div className="text-[11px] text-muted-foreground">{item.desc}</div>
+              <div className="relative">
+                <div className="text-sm font-semibold text-foreground leading-tight">{item.pillar}</div>
+                <div className="text-[11px] text-muted-foreground/80 mt-0.5 leading-snug">{item.desc}</div>
               </div>
             </div>
           ))}
         </div>
       </div>
 
-      <Button onClick={onNext} className="w-full">
+      <Button onClick={onNext} className="w-full h-12 text-base">
         Continuar
       </Button>
     </div>

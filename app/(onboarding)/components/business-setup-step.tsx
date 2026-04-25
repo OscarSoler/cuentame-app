@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -25,6 +28,26 @@ export function BusinessSetupStep({
   businessType,
   onBusinessTypeChange,
 }: BusinessSetupStepProps) {
+  const [error, setError] = useState("");
+
+  const handleContinue = () => {
+    if (!businessName.trim()) {
+      setError("Escribe el nombre de tu negocio");
+      return;
+    }
+    if (!businessType) {
+      setError("Selecciona qué tipo de negocio tienes");
+      return;
+    }
+    setError("");
+    onNext();
+  };
+
+  const handleSelectType = (key: string) => {
+    onBusinessTypeChange(key);
+    if (error) setError("");
+  };
+
   return (
     <div className="flex flex-col items-center text-center flex-1 justify-between py-10 px-6">
       <div className="text-[10px] tracking-[0.25em] uppercase text-muted-foreground/70">
@@ -46,37 +69,50 @@ export function BusinessSetupStep({
           type="text"
           placeholder="Nombre del negocio"
           value={businessName}
-          onChange={(e) => onBusinessNameChange(e.target.value)}
-          className="max-w-65 h-11 rounded-xl bg-card/60 backdrop-blur-sm border-border/50 text-center text-sm placeholder:text-muted-foreground/50"
+          onChange={(e) => {
+            onBusinessNameChange(e.target.value);
+            if (error) setError("");
+          }}
+          className="w-full max-w-72 h-14 px-5 rounded-2xl bg-card/60 backdrop-blur-sm border-border/50 text-center text-lg placeholder:text-muted-foreground/40 [font-size:16px] sm:text-lg"
         />
 
-        <div className="flex flex-wrap justify-center gap-2 max-w-72">
-          {businessTypes.map((bt) => (
-            <button
-              key={bt.key}
-              type="button"
-              onClick={() => onBusinessTypeChange(bt.key)}
-              className={`flex items-center gap-1.5 rounded-full px-3 py-2 text-left transition-all cursor-pointer ${
-                businessType === bt.key ? "bg-primary/10 ring-1.5 ring-primary" : "bg-card/60 backdrop-blur-sm hover:bg-card/80"
-              }`}
-            >
-              <HugeiconsIcon
-                icon={bt.icon}
-                size={14}
-                className={businessType === bt.key ? "text-primary" : "text-muted-foreground/60"}
-                strokeWidth={1.5}
-              />
-              <span className={`text-xs font-medium ${businessType === bt.key ? "text-primary" : "text-foreground/70"}`}>
-                {bt.label}
-              </span>
-            </button>
-          ))}
+        <div className="flex flex-col items-center gap-2 w-full">
+          <span className="text-[11px] text-muted-foreground/70 font-medium">
+            ¿Qué tipo de negocio tienes?
+          </span>
+          <div className="flex flex-wrap justify-center gap-2.5 max-w-80">
+            {businessTypes.map((bt) => (
+              <button
+                key={bt.key}
+                type="button"
+                onClick={() => handleSelectType(bt.key)}
+                className={`flex items-center gap-2 rounded-full px-4 py-2.5 text-left transition-all cursor-pointer ${
+                  businessType === bt.key ? "bg-primary/10 ring-1.5 ring-primary" : "bg-card/60 backdrop-blur-sm hover:bg-card/80"
+                }`}
+              >
+                <HugeiconsIcon
+                  icon={bt.icon}
+                  size={16}
+                  className={businessType === bt.key ? "text-primary" : "text-muted-foreground/60"}
+                  strokeWidth={1.5}
+                />
+                <span className={`text-sm font-medium ${businessType === bt.key ? "text-primary" : "text-foreground/70"}`}>
+                  {bt.label}
+                </span>
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
-      <Button onClick={onNext} disabled={!businessName.trim() || !businessType} className="w-full">
-        Continuar
-      </Button>
+      <div className="w-full flex flex-col items-center gap-2">
+        {error && (
+          <p className="text-sm text-destructive">{error}</p>
+        )}
+        <Button onClick={handleContinue} className="w-full">
+          Continuar
+        </Button>
+      </div>
     </div>
   );
 }

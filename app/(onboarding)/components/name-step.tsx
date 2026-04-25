@@ -29,7 +29,7 @@ export function NameStep({ onNext, name, onNameChange }: NameStepProps) {
           placeholder="Tu nombre"
           value={name}
           onChange={(e) => onNameChange(e.target.value)}
-          className="max-w-65 h-11 rounded-xl bg-card/60 backdrop-blur-sm border-border/50 text-center text-sm placeholder:text-muted-foreground/50"
+          className="w-full max-w-72 h-14 px-5 rounded-2xl bg-card/60 backdrop-blur-sm border-border/50 text-center text-lg placeholder:text-muted-foreground/40 [font-size:16px] sm:text-lg"
         />
       </div>
 

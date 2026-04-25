@@ -60,7 +60,7 @@ export async function POST(req: Request) {
     });
   }
 
-  const tools = buildChatTools({ ledgerId });
+  const tools = buildChatTools({ ledgerId, ledgerType });
   const previous = await new GetConversation({ repository: conversationRepo })
     .byIdWithMessages(conversationId);
   const previousMessages = (previous?.messages ?? []).map(

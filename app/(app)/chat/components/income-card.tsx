@@ -3,6 +3,7 @@
 import { HugeiconsIcon } from "@hugeicons/react";
 import { ArrowDown01Icon } from "@hugeicons/core-free-icons";
 import { formatCurrency } from "@/lib/utils";
+import { useLedger } from "@/lib/context/ledger-context";
 import { IncomeDetailDrawer } from "./income-detail-drawer";
 
 const categoryLabels: Record<string, string> = {
@@ -26,8 +27,10 @@ export function IncomeCard({
   date,
   ivaAmount,
 }: IncomeCardProps) {
+  const { activeLedger } = useLedger();
+  const showIva = activeLedger.type === "business" && ivaAmount > 0;
   return (
-    <IncomeDetailDrawer income={{ amount, category, note, date, ivaAmount }}>
+    <IncomeDetailDrawer income={{ amount, category, note, date, ivaAmount: showIva ? ivaAmount : 0 }}>
       <div
         role="button"
         tabIndex={0}
@@ -67,7 +70,7 @@ export function IncomeCard({
               {categoryLabels[category] ?? category}
             </span>
           </div>
-          {ivaAmount > 0 && (
+          {showIva && (
             <div className="bg-muted/60 rounded-full px-2 py-0.5">
               <span className="text-[10px] text-muted-foreground">
                 IVA {formatCurrency(ivaAmount)}

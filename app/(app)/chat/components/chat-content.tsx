@@ -61,7 +61,8 @@ export function ChatContent({ variant = "page" }: ChatContentProps) {
     };
   }, [activeLedger.id]);
 
-  if (state.status === "loading") return <ChatSkeleton isDrawer={variant === "drawer"} />;
+  if (state.status === "loading")
+    return <ChatSkeleton isDrawer={variant === "drawer"} />;
   if (state.status === "error") {
     console.error("[ChatContent] hydration error:", state.error);
     return null;
