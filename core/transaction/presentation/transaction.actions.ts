@@ -133,6 +133,19 @@ export async function getRecentTransactionsAction(ledgerId: string, limit = 10) 
   });
 }
 
+export async function getRecentTransactionsByMonthAction(
+  ledgerId: string,
+  year: number,
+  month: number,
+  limit = 10,
+) {
+  return wrapAction(async () => {
+    await requireSession();
+    const txs = await useCases().get.recentByMonth(ledgerId, year, month, limit);
+    return txs.map(toDTO);
+  });
+}
+
 export async function getMonthSummaryAction(ledgerId: string, year: number, month: number) {
   return wrapAction(async () => {
     await requireSession();

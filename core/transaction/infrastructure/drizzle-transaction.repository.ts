@@ -95,6 +95,29 @@ export class DrizzleTransactionRepository implements TransactionRepository {
     return rows.map(toEntity);
   }
 
+  async getRecentByMonth(
+    ledgerId: string,
+    year: number,
+    month: number,
+    limit: number,
+  ): Promise<Transaction[]> {
+    const { start, end } = monthBounds(year, month);
+    const rows = await db
+      .select()
+      .from(transactions)
+      .where(
+        and(
+          eq(transactions.ledgerId, ledgerId),
+          gte(transactions.date, start),
+          lte(transactions.date, end),
+        ),
+      )
+      .orderBy(desc(transactions.date), desc(transactions.createdAt))
+      .limit(limit);
+
+    return rows.map(toEntity);
+  }
+
   async getMonthSummary(ledgerId: string, year: number, month: number): Promise<MonthSummary> {
     const { start, end } = monthBounds(year, month);
 

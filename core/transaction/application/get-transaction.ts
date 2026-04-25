@@ -30,6 +30,17 @@ export class GetTransaction {
     return this.config.repository.getRecent(ledgerId, limit);
   }
 
+  async recentByMonth(
+    ledgerId: string,
+    year: number,
+    month: number,
+    limit = 10,
+  ): Promise<Transaction[]> {
+    this.assertMonth(year, month);
+    if (limit <= 0) throw new Error("El limit debe ser mayor a 0");
+    return this.config.repository.getRecentByMonth(ledgerId, year, month, limit);
+  }
+
   async byMonth(ledgerId: string, year: number, month: number): Promise<Transaction[]> {
     this.assertMonth(year, month);
     return this.config.repository.getByMonth(ledgerId, year, month);

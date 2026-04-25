@@ -58,7 +58,13 @@ export function DashboardShell({
 
   return (
     <div className="flex flex-col gap-5 px-5 pt-6 pb-4">
-      <BalanceHeader month={month} year={year} onPeriodChange={handlePeriodChange} />
+      <BalanceHeader
+        month={month}
+        year={year}
+        currentYear={currentYear}
+        currentMonth={currentMonth}
+        onPeriodChange={handlePeriodChange}
+      />
       <LedgerTabs
         active={activeLedger.type}
         onChange={handleLedgerChange}

@@ -33,6 +33,12 @@ export interface TransactionRepository {
   getById(id: string): Promise<Transaction | null>;
   getByLedgerId(ledgerId: string): Promise<Transaction[]>;
   getRecent(ledgerId: string, limit: number): Promise<Transaction[]>;
+  getRecentByMonth(
+    ledgerId: string,
+    year: number,
+    month: number,
+    limit: number,
+  ): Promise<Transaction[]>;
   getByMonth(ledgerId: string, year: number, month: number): Promise<Transaction[]>;
   getMonthSummary(ledgerId: string, year: number, month: number): Promise<MonthSummary>;
   getPillarsSpentByMonth(ledgerId: string, year: number, month: number): Promise<PillarSpent[]>;

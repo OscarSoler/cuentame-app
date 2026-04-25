@@ -91,7 +91,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
       </Suspense>
 
       <Suspense key={`recent-${suspenseKey}`} fallback={<RecentSkeleton />}>
-        <RecentSection ledgerId={activeLedger.id} />
+        <RecentSection ledgerId={activeLedger.id} year={year} month={humanMonth} />
       </Suspense>
     </DashboardShell>
   );

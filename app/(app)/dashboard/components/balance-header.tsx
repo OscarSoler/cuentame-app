@@ -4,6 +4,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { ArrowLeft01Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons";
 import { useSession } from "@/lib/auth-client";
 import { MONTHS_ES_ABBR } from "@/lib/months";
+import { MonthPicker, isFuturePeriod } from "./month-picker";
 
 function firstName(fullName?: string | null) {
   return fullName?.trim().split(/\s+/)[0] ?? "";
@@ -12,6 +13,8 @@ function firstName(fullName?: string | null) {
 interface BalanceHeaderProps {
   month: number;
   year: number;
+  currentYear: number;
+  currentMonth: number;
   onPeriodChange: (year: number, month: number) => void;
 }
 
@@ -20,12 +23,19 @@ function shiftPeriod(year: number, month: number, delta: number) {
   return { year: Math.floor(total / 12), month: ((total % 12) + 12) % 12 };
 }
 
-export function BalanceHeader({ month, year, onPeriodChange }: BalanceHeaderProps) {
+export function BalanceHeader({
+  month,
+  year,
+  currentYear,
+  currentMonth,
+  onPeriodChange,
+}: BalanceHeaderProps) {
   const { data: session } = useSession();
   const displayName = firstName(session?.user.name);
 
   const prev = shiftPeriod(year, month, -1);
   const next = shiftPeriod(year, month, 1);
+  const nextDisabled = isFuturePeriod(next.year, next.month, currentYear, currentMonth);
 
   return (
     <div className="flex items-center justify-between">
@@ -47,16 +57,23 @@ export function BalanceHeader({ month, year, onPeriodChange }: BalanceHeaderProp
           type="button"
           onClick={() => onPeriodChange(prev.year, prev.month)}
           className="w-6 h-6 rounded-full flex items-center justify-center cursor-pointer hover:bg-accent/30 transition-colors"
+          aria-label="Mes anterior"
         >
           <HugeiconsIcon icon={ArrowLeft01Icon} size={12} className="text-muted-foreground/70" />
         </button>
-        <span className="text-[11px] font-medium text-muted-foreground min-w-14 text-center">
-          {MONTHS_ES_ABBR[month]} {year}
-        </span>
+        <MonthPicker
+          month={month}
+          year={year}
+          currentYear={currentYear}
+          currentMonth={currentMonth}
+          onChange={onPeriodChange}
+        />
         <button
           type="button"
+          disabled={nextDisabled}
           onClick={() => onPeriodChange(next.year, next.month)}
-          className="w-6 h-6 rounded-full flex items-center justify-center cursor-pointer hover:bg-accent/30 transition-colors"
+          className="w-6 h-6 rounded-full flex items-center justify-center cursor-pointer hover:bg-accent/30 transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+          aria-label="Mes siguiente"
         >
           <HugeiconsIcon icon={ArrowRight01Icon} size={12} className="text-muted-foreground/70" />
         </button>
