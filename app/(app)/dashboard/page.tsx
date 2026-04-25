@@ -53,7 +53,18 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   const humanMonth = jsMonth + 1;
 
   const isBusiness = activeLedger.type === "business";
+  const isCurrentMonth = year === currentYear && jsMonth === currentMonth;
   const suspenseKey = `${activeLedger.id}-${year}-${jsMonth}`;
+
+  const pendingFallback = (
+    <>
+      {isCurrentMonth && <ScoreSkeleton />}
+      <SummarySkeleton />
+      {isCurrentMonth && <ChartSkeleton />}
+      <PillarsSkeleton />
+      <RecentSkeleton />
+    </>
+  );
 
   return (
     <DashboardShell
@@ -63,10 +74,13 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
       year={year}
       currentYear={currentYear}
       currentMonth={currentMonth}
+      pendingFallback={pendingFallback}
     >
-      <Suspense key={`score-${activeLedger.id}`} fallback={<ScoreSkeleton />}>
-        <ScoreSection ledgerId={activeLedger.id} ledgerType={activeLedger.type} />
-      </Suspense>
+      {isCurrentMonth && (
+        <Suspense key={`score-${activeLedger.id}`} fallback={<ScoreSkeleton />}>
+          <ScoreSection ledgerId={activeLedger.id} ledgerType={activeLedger.type} />
+        </Suspense>
+      )}
 
       <Suspense key={`summary-${suspenseKey}`} fallback={<SummarySkeleton />}>
         <SummarySection
@@ -77,9 +91,11 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
         />
       </Suspense>
 
-      <Suspense key={`chart-${activeLedger.id}`} fallback={<ChartSkeleton />}>
-        <ChartSection ledgerId={activeLedger.id} />
-      </Suspense>
+      {isCurrentMonth && (
+        <Suspense key={`chart-${activeLedger.id}`} fallback={<ChartSkeleton />}>
+          <ChartSection ledgerId={activeLedger.id} />
+        </Suspense>
+      )}
 
       <Suspense key={`pillars-${suspenseKey}`} fallback={<PillarsSkeleton />}>
         <PillarsSection

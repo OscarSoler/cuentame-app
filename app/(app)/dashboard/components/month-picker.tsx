@@ -6,6 +6,7 @@ import {
   ArrowLeft01Icon,
   ArrowRight01Icon,
   ArrowDown01Icon,
+  Calendar03Icon,
 } from "@hugeicons/core-free-icons";
 import {
   Popover,
@@ -56,13 +57,27 @@ export function MonthPicker({
         render={
           <button
             type="button"
-            className="text-[11px] font-medium text-muted-foreground inline-flex items-center gap-0.5 cursor-pointer hover:bg-accent/30 rounded-full px-2 py-0.5 transition-colors"
+            className={cn(
+              "inline-flex items-center gap-1.5 h-7 pl-2 pr-1.5 rounded-full",
+              "bg-black/5 hover:bg-black/10 active:bg-black/15",
+              "text-xs font-medium text-foreground",
+              "transition-colors cursor-pointer",
+              "data-[popup-open]:bg-black/10",
+            )}
+            aria-label={`Cambiar mes — actual ${MONTHS_ES_ABBR[month]} ${year}`}
           >
-            {MONTHS_ES_ABBR[month]} {year}
+            <HugeiconsIcon
+              icon={Calendar03Icon}
+              size={12}
+              className="text-muted-foreground"
+            />
+            <span className="leading-none">
+              {MONTHS_ES_ABBR[month]} {year}
+            </span>
             <HugeiconsIcon
               icon={ArrowDown01Icon}
-              size={10}
-              className="text-muted-foreground/70"
+              size={12}
+              className="text-muted-foreground/70 transition-transform data-[popup-open]:rotate-180"
             />
           </button>
         }

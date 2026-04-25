@@ -1,5 +1,6 @@
 "use client";
 
+import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import type { Ledger, LedgerType } from "@/lib/context/ledger-context";
 import { useLedger } from "@/lib/context/ledger-context";
@@ -14,6 +15,7 @@ interface DashboardShellProps {
   currentYear: number;
   currentMonth: number;
   children: React.ReactNode;
+  pendingFallback: React.ReactNode;
 }
 
 export function DashboardShell({
@@ -24,9 +26,11 @@ export function DashboardShell({
   currentYear,
   currentMonth,
   children,
+  pendingFallback,
 }: DashboardShellProps) {
   const router = useRouter();
   const { switchType } = useLedger();
+  const [isPending, startTransition] = useTransition();
 
   const pushParams = (next: {
     ledger?: LedgerType;
@@ -41,7 +45,9 @@ export function DashboardShell({
     if (nextYear !== currentYear) params.set("year", String(nextYear));
     if (nextMonth !== currentMonth) params.set("month", String(nextMonth));
     const qs = params.toString();
-    router.push(qs ? `/dashboard?${qs}` : "/dashboard");
+    startTransition(() => {
+      router.push(qs ? `/dashboard?${qs}` : "/dashboard");
+    });
   };
 
   const handleLedgerChange = (type: LedgerType) => {
@@ -70,7 +76,7 @@ export function DashboardShell({
         onChange={handleLedgerChange}
         availableTypes={ledgers.map((l) => l.type)}
       />
-      {children}
+      {isPending ? pendingFallback : children}
     </div>
   );
 }
