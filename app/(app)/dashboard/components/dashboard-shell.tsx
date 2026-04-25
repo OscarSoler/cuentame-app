@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import type { Ledger, LedgerType } from "@/lib/context/ledger-context";
-import { setStoredLedgerType } from "@/lib/ledger/preference";
+import { useLedger } from "@/lib/context/ledger-context";
 import { BalanceHeader } from "./balance-header";
 import { LedgerTabs } from "./ledger-tabs";
 
@@ -26,6 +26,7 @@ export function DashboardShell({
   children,
 }: DashboardShellProps) {
   const router = useRouter();
+  const { switchType } = useLedger();
 
   const pushParams = (next: {
     ledger?: LedgerType;
@@ -46,7 +47,7 @@ export function DashboardShell({
   const handleLedgerChange = (type: LedgerType) => {
     if (type === activeLedger.type) return;
     if (!ledgers.some((l) => l.type === type)) return;
-    setStoredLedgerType(type);
+    switchType(type);
     pushParams({ ledger: type });
   };
 
