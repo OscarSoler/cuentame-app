@@ -4,18 +4,11 @@ import { useRef, useEffect } from "react";
 import type { UIMessage } from "ai";
 import { ExpenseCard } from "./expense-card";
 import { IncomeCard } from "./income-card";
-import { EmotionPicker } from "./emotion-picker";
 
 interface ChatMessagesProps {
   messages: UIMessage[];
   isLoading: boolean;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onToolOutput: (params: { tool: string; toolCallId: string; output: any }) => void;
 }
-
-const emojiMap: Record<string, string> = {
-  happy: "😊", neutral: "😐", sad: "😔", guilty: "😬", proud: "🤩",
-};
 
 function ToolError({ error }: { error: string }) {
   return (
@@ -26,7 +19,7 @@ function ToolError({ error }: { error: string }) {
   );
 }
 
-export function ChatMessages({ messages, isLoading, onToolOutput }: ChatMessagesProps) {
+export function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -39,8 +32,19 @@ export function ChatMessages({ messages, isLoading, onToolOutput }: ChatMessages
       if (part.output?.status === "error") {
         return <ToolError key={part.toolCallId} error={part.output.error} />;
       }
-      const { amount, category, note, pillar, date } = part.output;
-      return <ExpenseCard key={part.toolCallId} amount={amount} category={category} note={note} pillar={pillar} date={date} />;
+      const { id, amount, category, note, pillar, date, emotion } = part.output;
+      return (
+        <ExpenseCard
+          key={part.toolCallId}
+          id={id}
+          amount={amount}
+          category={category}
+          note={note}
+          pillar={pillar}
+          date={date}
+          emotion={emotion ?? null}
+        />
+      );
     }
     if (part.type === "tool-registerIncome" && part.state === "output-available") {
       if (part.output?.status === "error") {
@@ -48,27 +52,6 @@ export function ChatMessages({ messages, isLoading, onToolOutput }: ChatMessages
       }
       const { amount, category, note, date, ivaAmount } = part.output;
       return <IncomeCard key={part.toolCallId} amount={amount} category={category} note={note} date={date} ivaAmount={ivaAmount} />;
-    }
-    if (part.type === "tool-saveEmotion") {
-      return null;
-    }
-    if (part.type === "tool-askEmotion" && part.state === "input-available") {
-      return (
-        <EmotionPicker
-          key={part.toolCallId}
-          message={part.input.message}
-          onSelect={(emotion) => onToolOutput({ tool: "askEmotion", toolCallId: part.toolCallId, output: { emotion } })}
-        />
-      );
-    }
-    if (part.type === "tool-askEmotion" && part.state === "output-available") {
-      const emotion = part.output.emotion;
-      return (
-        <div key={part.toolCallId} className="flex items-center gap-2 bg-accent/30 rounded-full px-3 py-1.5 w-fit">
-          <span className="text-base">{emojiMap[emotion] ?? "😊"}</span>
-          <span className="text-[11px] text-accent-foreground font-medium">Emoción registrada</span>
-        </div>
-      );
     }
     if ((part.type === "tool-registerExpense" || part.type === "tool-registerIncome") && part.state === "input-available") {
       return (

@@ -107,6 +107,18 @@ export async function updateTransactionAction(id: string, input: UpdateTransacti
   });
 }
 
+export async function updateTransactionEmotionAction(
+  id: string,
+  emotion: TransactionEmotion | null,
+) {
+  return wrapAction(async () => {
+    await requireSession();
+    await useCases().update.execute(id, { emotion });
+    revalidatePath("/dashboard");
+    return { id };
+  });
+}
+
 export async function deleteTransactionAction(id: string) {
   return wrapAction(async () => {
     await requireSession();

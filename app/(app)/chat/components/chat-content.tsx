@@ -1,11 +1,7 @@
 "use client";
 
 import { useChat } from "@ai-sdk/react";
-import {
-  DefaultChatTransport,
-  lastAssistantMessageIsCompleteWithToolCalls,
-  type UIMessage,
-} from "ai";
+import { DefaultChatTransport, type UIMessage } from "ai";
 import { useEffect, useMemo, useState } from "react";
 import { useLedger } from "@/lib/context/ledger-context";
 import {
@@ -21,63 +17,107 @@ interface ChatContentProps {
 }
 
 export function ChatContent({ variant = "page" }: ChatContentProps) {
-  const { activeLedger } = useLedger();
-  return <ChatContentInner key={activeLedger.id} variant={variant} />;
-}
-
-function ChatContentInner({ variant }: ChatContentProps) {
   const { activeLedger, switchType } = useLedger();
-  const [conversationId, setConversationId] = useState<string | null>(null);
-  const [initialMessages, setInitialMessages] = useState<UIMessage[]>([]);
-  const [isHydrating, setIsHydrating] = useState(true);
+  const [state, setState] = useState<
+    | { status: "loading" }
+    | { status: "ready"; conversationId: string; initialMessages: UIMessage[] }
+    | { status: "error"; error: string }
+  >({ status: "loading" });
 
   useEffect(() => {
     let cancelled = false;
+    setState({ status: "loading" });
+
     (async () => {
       const convo = await getOrCreateLatestConversationAction(activeLedger.id);
-      if (!convo.success || cancelled) {
-        if (!cancelled) setIsHydrating(false);
+      if (cancelled) return;
+      if (!convo.success) {
+        setState({ status: "error", error: convo.error });
         return;
       }
 
       const withMessages = await getConversationMessagesAction(convo.data.id);
       if (cancelled) return;
 
-      setConversationId(convo.data.id);
-      if (withMessages.success) {
-        setInitialMessages(
-          withMessages.data.messages.map(
-            (m) => ({ id: m.id, role: m.role, parts: m.parts }) as UIMessage,
-          ),
-        );
+      if (!withMessages.success) {
+        setState({ status: "error", error: withMessages.error });
+        return;
       }
-      setIsHydrating(false);
+
+      const initialMessages = withMessages.data.messages.map(
+        (m) => ({ id: m.id, role: m.role, parts: m.parts }) as UIMessage,
+      );
+
+      setState({
+        status: "ready",
+        conversationId: convo.data.id,
+        initialMessages,
+      });
     })();
+
     return () => {
       cancelled = true;
     };
   }, [activeLedger.id]);
 
+  if (state.status === "loading") return null;
+  if (state.status === "error") {
+    console.error("[ChatContent] hydration error:", state.error);
+    return null;
+  }
+
+  return (
+    <ChatContentReady
+      key={state.conversationId}
+      conversationId={state.conversationId}
+      initialMessages={state.initialMessages}
+      variant={variant}
+      ledgerId={activeLedger.id}
+      ledgerType={activeLedger.type}
+      onLedgerChange={switchType}
+    />
+  );
+}
+
+interface ChatContentReadyProps {
+  conversationId: string;
+  initialMessages: UIMessage[];
+  variant: "page" | "drawer";
+  ledgerId: string;
+  ledgerType: "personal" | "business";
+  onLedgerChange: (type: "personal" | "business") => void;
+}
+
+function ChatContentReady({
+  conversationId,
+  initialMessages,
+  variant,
+  ledgerId,
+  ledgerType,
+  onLedgerChange,
+}: ChatContentReadyProps) {
   const transport = useMemo(
     () =>
       new DefaultChatTransport({
         api: "/api/chat",
-        body: {
-          ledgerId: activeLedger.id,
-          ledgerType: activeLedger.type,
-          conversationId,
+        prepareSendMessagesRequest({ messages }) {
+          return {
+            body: {
+              message: messages[messages.length - 1],
+              ledgerId,
+              ledgerType,
+              conversationId,
+            },
+          };
         },
       }),
-    [activeLedger.id, activeLedger.type, conversationId],
+    [ledgerId, ledgerType, conversationId],
   );
 
-  const { messages, sendMessage, addToolOutput, status } = useChat({
+  const { messages, sendMessage, status } = useChat({
     messages: initialMessages,
     transport,
-    sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
   });
-
-  if (isHydrating) return null;
 
   const isLoading = status === "streaming" || status === "submitted";
   const isDrawer = variant === "drawer";
@@ -86,15 +126,11 @@ function ChatContentInner({ variant }: ChatContentProps) {
   return (
     <div className="flex flex-col w-full h-full">
       {hasMessages ? (
-        <ChatMessages
-          messages={messages}
-          isLoading={isLoading}
-          onToolOutput={addToolOutput}
-        />
+        <ChatMessages messages={messages} isLoading={isLoading} />
       ) : (
         <ChatSuggestions
           isDrawer={isDrawer}
-          ledgerType={activeLedger.type}
+          ledgerType={ledgerType}
           onSelect={(prompt) => {
             if (!isLoading) sendMessage({ text: prompt });
           }}
@@ -103,9 +139,9 @@ function ChatContentInner({ variant }: ChatContentProps) {
       <ChatInput
         isDrawer={isDrawer}
         isLoading={isLoading}
-        activeLedgerType={activeLedger.type}
+        activeLedgerType={ledgerType}
         onSubmit={(text) => sendMessage({ text })}
-        onLedgerChange={switchType}
+        onLedgerChange={onLedgerChange}
       />
     </div>
   );

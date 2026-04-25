@@ -1,9 +1,6 @@
 import { tool } from "ai";
 import { z } from "zod";
-import {
-  createTransactionAction,
-  updateTransactionAction,
-} from "@/core/transaction/presentation/transaction.actions";
+import { createTransactionAction } from "@/core/transaction/presentation/transaction.actions";
 
 interface ToolContext {
   ledgerId: string;
@@ -99,35 +96,5 @@ export function buildChatTools({ ledgerId }: ToolContext) {
     },
   });
 
-  const askEmotion = tool({
-    description:
-      "Pregunta al usuario cómo se sintió con la transacción que acaba de registrar.",
-    inputSchema: z.object({
-      expenseId: z.string().describe("ID de la transacción recién registrada"),
-      message: z.string().describe("Mensaje para preguntar sobre la emoción"),
-    }),
-    outputSchema: z.object({
-      emotion: z.enum(["happy", "neutral", "sad"]),
-    }),
-  });
-
-  const saveEmotion = tool({
-    description:
-      "Guarda la emoción que el usuario sintió con una transacción ya registrada. Llámala después de que el usuario responda a askEmotion.",
-    inputSchema: z.object({
-      transactionId: z.string().describe("ID de la transacción a actualizar"),
-      emotion: z
-        .enum(["happy", "neutral", "sad"])
-        .describe("Emoción del usuario: happy|neutral|sad"),
-    }),
-    execute: async ({ transactionId, emotion }) => {
-      const result = await updateTransactionAction(transactionId, { emotion });
-      if (!result.success) {
-        return { status: "error" as const, error: result.error };
-      }
-      return { status: "saved" as const, transactionId, emotion };
-    },
-  });
-
-  return { registerExpense, registerIncome, askEmotion, saveEmotion };
+  return { registerExpense, registerIncome };
 }
