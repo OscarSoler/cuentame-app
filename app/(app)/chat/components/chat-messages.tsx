@@ -1,22 +1,40 @@
 "use client";
 
 import { useRef, useEffect } from "react";
+import Image from "next/image";
 import type { UIMessage } from "ai";
 import { ExpenseCard } from "./expense-card";
 import { IncomeCard } from "./income-card";
-import { EmotionPicker } from "./emotion-picker";
 
 interface ChatMessagesProps {
   messages: UIMessage[];
   isLoading: boolean;
-  onToolOutput: (params: { tool: string; toolCallId: string; output: string }) => void;
 }
 
-const emojiMap: Record<string, string> = {
-  happy: "😊", neutral: "😐", sad: "😔", guilty: "😬", proud: "🤩",
-};
+function AssistantAvatar() {
+  return (
+    <div className="shrink-0 w-7 h-7 rounded-full overflow-hidden">
+      <Image
+        src="/avatar.png"
+        alt="Asistente"
+        width={28}
+        height={28}
+        className="w-full h-full object-cover"
+      />
+    </div>
+  );
+}
 
-export function ChatMessages({ messages, isLoading, onToolOutput }: ChatMessagesProps) {
+function ToolError({ error }: { error: string }) {
+  return (
+    <div className="flex items-center gap-2 bg-destructive/10 border border-destructive/20 rounded-2xl px-3 py-2 text-[12px] text-destructive/80">
+      <span className="w-1.5 h-1.5 rounded-full bg-destructive/60" />
+      <span>No pude guardarlo: {error}</span>
+    </div>
+  );
+}
+
+export function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -26,35 +44,40 @@ export function ChatMessages({ messages, isLoading, onToolOutput }: ChatMessages
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const renderToolPart = (part: any) => {
     if (part.type === "tool-registerExpense" && part.state === "output-available") {
-      const { amount, category, note, pillar, date } = part.output;
-      return <ExpenseCard key={part.toolCallId} amount={amount} category={category} note={note} pillar={pillar} date={date} />;
-    }
-    if (part.type === "tool-registerIncome" && part.state === "output-available") {
-      const { amount, category, note, date, ivaAmount } = part.output;
-      return <IncomeCard key={part.toolCallId} amount={amount} category={category} note={note} date={date} ivaAmount={ivaAmount} />;
-    }
-    if (part.type === "tool-askEmotion" && part.state === "input-available") {
+      if (part.output?.status === "error") {
+        return <ToolError key={part.toolCallId} error={part.output.error} />;
+      }
+      const { id, amount, category, note, pillar, date, emotion } = part.output;
       return (
-        <EmotionPicker
+        <ExpenseCard
           key={part.toolCallId}
-          message={part.input.message}
-          onSelect={(emotion) => onToolOutput({ tool: "askEmotion", toolCallId: part.toolCallId, output: JSON.stringify({ emotion }) })}
+          id={id}
+          amount={amount}
+          category={category}
+          note={note}
+          pillar={pillar}
+          date={date}
+          emotion={emotion ?? null}
         />
       );
     }
-    if (part.type === "tool-askEmotion" && part.state === "output-available") {
-      const emotion = JSON.parse(part.output).emotion;
-      return (
-        <div key={part.toolCallId} className="flex items-center gap-2 bg-accent/30 rounded-full px-3 py-1.5 w-fit">
-          <span className="text-base">{emojiMap[emotion] ?? "😊"}</span>
-          <span className="text-[11px] text-accent-foreground font-medium">Emoción registrada</span>
-        </div>
-      );
+    if (part.type === "tool-registerIncome" && part.state === "output-available") {
+      if (part.output?.status === "error") {
+        return <ToolError key={part.toolCallId} error={part.output.error} />;
+      }
+      const { amount, category, note, date, ivaAmount } = part.output;
+      return <IncomeCard key={part.toolCallId} amount={amount} category={category} note={note} date={date} ivaAmount={ivaAmount} />;
     }
     if ((part.type === "tool-registerExpense" || part.type === "tool-registerIncome") && part.state === "input-available") {
       return (
-        <div key={part.toolCallId} className="flex items-center gap-2 text-xs text-muted-foreground/60">
-          <span className="w-1.5 h-1.5 rounded-full bg-primary/40 animate-pulse" />
+        <div
+          key={part.toolCallId}
+          className="flex items-center gap-2 bg-accent/30 border border-primary/10 rounded-full pl-2.5 pr-3 py-1.5 text-[11px] font-medium text-primary/70 w-fit"
+        >
+          <span className="relative flex w-1.5 h-1.5">
+            <span className="absolute inset-0 rounded-full bg-primary/40 animate-ping" />
+            <span className="relative w-1.5 h-1.5 rounded-full bg-primary/70" />
+          </span>
           Registrando...
         </div>
       );
@@ -64,26 +87,51 @@ export function ChatMessages({ messages, isLoading, onToolOutput }: ChatMessages
 
   return (
     <div className="flex-1 overflow-y-auto">
-      <div className="flex flex-col gap-4 px-5 py-4">
-        {messages.map((message) => {
+      <div className="flex flex-col gap-5 px-4 py-5">
+        {messages.map((message, msgIdx) => {
           const isUser = message.role === "user";
+          const prevMessage = messages[msgIdx - 1];
+          const isFirstInGroup = !prevMessage || prevMessage.role !== message.role;
+
+          if (isUser) {
+            return (
+              <div
+                key={message.id}
+                className="flex justify-end"
+              >
+                <div className="flex flex-col gap-1.5 items-end max-w-[82%]">
+                  {message.parts.map((part, i) => {
+                    if (part.type === "text" && part.text) {
+                      return (
+                        <div
+                          key={`${message.id}-${i}`}
+                          className="rounded-2xl rounded-br-md px-4 py-2.5 text-[14px] leading-relaxed bg-gradient-to-br from-primary to-[#3a6a1d] text-primary-foreground shadow-[0_2px_8px_rgba(45,80,22,0.18)]"
+                        >
+                          <p className="whitespace-pre-wrap break-words">{part.text}</p>
+                        </div>
+                      );
+                    }
+                    return null;
+                  })}
+                </div>
+              </div>
+            );
+          }
+
           return (
             <div
               key={message.id}
-              className={`flex flex-col gap-2 ${isUser ? "items-end" : "items-start"} max-w-[95%] ${isUser ? "ml-auto" : "mr-auto"}`}
+              className="flex flex-col gap-1.5 items-start max-w-[92%]"
             >
+              {isFirstInGroup && <AssistantAvatar />}
               {message.parts.map((part, i) => {
                 if (part.type === "text" && part.text) {
                   return (
                     <div
                       key={`${message.id}-${i}`}
-                      className={`rounded-2xl px-3.5 py-2.5 text-[13px] leading-relaxed ${
-                        isUser
-                          ? "bg-primary text-primary-foreground rounded-br-sm"
-                          : "bg-card/60 backdrop-blur-sm text-foreground border border-border/20 rounded-bl-sm"
-                      }`}
+                      className="rounded-2xl rounded-tl-md px-4 py-2.5 text-[14px] leading-relaxed bg-cream/80 backdrop-blur-sm text-foreground border border-border/40 shadow-[0_1px_3px_rgba(45,80,22,0.04)]"
                     >
-                      <p className="whitespace-pre-wrap">{part.text}</p>
+                      <p className="whitespace-pre-wrap break-words">{part.text}</p>
                     </div>
                   );
                 }
@@ -95,11 +143,14 @@ export function ChatMessages({ messages, isLoading, onToolOutput }: ChatMessages
         })}
 
         {isLoading && messages[messages.length - 1]?.role === "user" && (
-          <div className="bg-card/60 backdrop-blur-sm border border-border/20 rounded-2xl rounded-bl-sm px-4 py-3 w-fit">
-            <div className="flex gap-1.5 items-center">
-              <span className="w-1.5 h-1.5 rounded-full bg-primary/40 animate-bounce [animation-delay:0ms]" />
-              <span className="w-1.5 h-1.5 rounded-full bg-primary/40 animate-bounce [animation-delay:150ms]" />
-              <span className="w-1.5 h-1.5 rounded-full bg-primary/40 animate-bounce [animation-delay:300ms]" />
+          <div className="flex flex-col gap-1.5 items-start">
+            <AssistantAvatar />
+            <div className="bg-cream/80 backdrop-blur-sm border border-border/40 rounded-2xl rounded-tl-md px-4 py-3 w-fit shadow-[0_1px_3px_rgba(45,80,22,0.04)]">
+              <div className="flex gap-1.5 items-center">
+                <span className="w-1.5 h-1.5 rounded-full bg-primary/50 animate-bounce [animation-delay:0ms]" />
+                <span className="w-1.5 h-1.5 rounded-full bg-primary/50 animate-bounce [animation-delay:150ms]" />
+                <span className="w-1.5 h-1.5 rounded-full bg-primary/50 animate-bounce [animation-delay:300ms]" />
+              </div>
             </div>
           </div>
         )}

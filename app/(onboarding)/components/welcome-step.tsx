@@ -18,7 +18,7 @@ export function WelcomeStep({ onNext }: StepProps) {
         <h1 className="font-heading text-3xl leading-snug text-foreground">
           Bienvenido a tu
           <br />
-          Santuario Financiero
+          <span className="font-accent font-bold text-4xl">Santuario Financiero</span>
         </h1>
 
         <div className="flex items-center gap-1.5 bg-accent/40 text-accent-foreground px-3 py-1.5 rounded-full text-xs">
@@ -43,17 +43,10 @@ export function WelcomeStep({ onNext }: StepProps) {
       </div>
 
       <div className="flex flex-col items-center gap-3 w-full max-w-65">
-        <Button
-          onClick={onNext}
-          className="w-full h-11 rounded-full bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 cursor-pointer"
-        >
+        <Button onClick={onNext} className="w-full">
           Empezar Mi Camino
         </Button>
-        <Button
-          variant="secondary"
-          onClick={() => router.push("/login")}
-          className="w-full h-11 rounded-full text-sm text-muted-foreground cursor-pointer"
-        >
+        <Button variant="secondary" onClick={() => router.push("/login")} className="w-full">
           Ya tengo una cuenta
         </Button>
       </div>

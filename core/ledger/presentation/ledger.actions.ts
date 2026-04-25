@@ -1,30 +1,28 @@
 "use server";
 
-import { db } from "@/lib/db";
-import { ledgers } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
-import { auth } from "@/app/lib/auth";
-import { headers } from "next/headers";
+import { unstable_cache, revalidateTag } from "next/cache";
+import { requireSession, wrapAction } from "@/core/_shared/action";
+import { DrizzleLedgerRepository } from "../infrastructure/drizzle-ledger.repository";
+import { GetLedger } from "../application/get-ledger";
+import { CreateLedger } from "../application/create-ledger";
+
+const loadUserLedgersCached = (userId: string) =>
+  unstable_cache(
+    async () => {
+      const repo = new DrizzleLedgerRepository();
+      const getLedger = new GetLedger({ repository: repo });
+      const ledgers = await getLedger.byUserId(userId);
+      return ledgers.map((l) => ({ id: l.id, type: l.type, name: l.name }));
+    },
+    ["user-ledgers", userId],
+    { tags: [`user-ledgers:${userId}`], revalidate: 3600 },
+  )();
 
 export async function getUserLedgersAction() {
-  try {
-    const h = await headers();
-    const session = await auth.api.getSession({ headers: h });
-
-    if (!session) return { success: false, error: "No autenticado" };
-
-    const result = await db
-      .select({ id: ledgers.id })
-      .from(ledgers)
-      .where(eq(ledgers.userId, session.user.id));
-
-    return { success: true, data: result };
-  } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : String(error),
-    };
-  }
+  return wrapAction(async () => {
+    const session = await requireSession();
+    return loadUserLedgersCached(session.user.id);
+  });
 }
 
 interface CreateLedgerInput {
@@ -35,28 +33,17 @@ interface CreateLedgerInput {
 }
 
 export async function createLedgerAction(input: CreateLedgerInput) {
-  try {
-    const h = await headers();
-    const session = await auth.api.getSession({ headers: h });
-
-    if (!session) return { success: false, error: "No autenticado" };
-
-    const [ledger] = await db
-      .insert(ledgers)
-      .values({
-        userId: session.user.id,
-        name: input.name,
-        type: input.type,
-        businessName: input.businessName ?? null,
-        businessType: input.businessType ?? null,
-      })
-      .returning({ id: ledgers.id });
-
-    return { success: true, data: { id: ledger.id } };
-  } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : String(error),
-    };
-  }
+  return wrapAction(async () => {
+    const session = await requireSession();
+    const createLedger = new CreateLedger({ repository: new DrizzleLedgerRepository() });
+    const ledger = await createLedger.execute({
+      userId: session.user.id,
+      name: input.name,
+      type: input.type,
+      businessName: input.businessName ?? null,
+      businessType: input.businessType ?? null,
+    });
+    revalidateTag(`user-ledgers:${session.user.id}`, "max");
+    return { id: ledger.id };
+  });
 }

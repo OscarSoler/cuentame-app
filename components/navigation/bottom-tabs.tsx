@@ -26,9 +26,7 @@ function TabLink({
         <HugeiconsIcon
           icon={icon}
           size={20}
-          className={`transition-colors ${
-            isActive ? "text-primary" : "text-muted-foreground/50"
-          }`}
+          className={isActive ? "text-primary" : "text-muted-foreground/50"}
           strokeWidth={isActive ? 1.8 : 1.5}
         />
         {isActive && (
@@ -36,7 +34,7 @@ function TabLink({
         )}
       </div>
       <span
-        className={`text-[10px] transition-colors ${
+        className={`text-[10px] ${
           isActive ? "text-primary font-medium" : "text-muted-foreground/50"
         }`}
       >
@@ -51,7 +49,7 @@ export function BottomTabs() {
   const isChatActive = pathname.startsWith("/chat");
 
   return (
-    <nav className="relative border-t border-border/20 bg-[#FAF7F2]/80 backdrop-blur-xl pb-[env(safe-area-inset-bottom)]">
+    <nav className="relative border-t border-border/20 bg-[#FAF7F2]/80 backdrop-blur-xl pb-[env(safe-area-inset-bottom)] h-14">
       <div className="flex items-center justify-around px-2 h-14">
         <TabLink
           href="/dashboard"
@@ -64,9 +62,9 @@ export function BottomTabs() {
           className="flex flex-col items-center justify-center -mt-4"
         >
           <div
-            className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-md transition-all ${
+            className={`rounded-xl flex items-center justify-center shadow-md w-10 h-10 ${
               isChatActive
-                ? "bg-primary shadow-primary/25 scale-105"
+                ? "bg-primary shadow-primary/25"
                 : "bg-primary/90 shadow-primary/15"
             }`}
           >
@@ -78,7 +76,7 @@ export function BottomTabs() {
             />
           </div>
           <span
-            className={`text-[10px] mt-0.5 transition-colors ${
+            className={`text-[10px] mt-0.5 ${
               isChatActive ? "text-primary font-medium" : "text-muted-foreground/60"
             }`}
           >

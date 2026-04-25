@@ -1,55 +1,66 @@
 "use client";
 
+import { useState, useTransition } from "react";
 import { HugeiconsIcon } from "@hugeicons/react";
-import {
-  CheckmarkCircle02Icon,
-  SparklesIcon,
-  FlowerPotIcon,
-  Book01Icon,
-  Coins01Icon,
-  Building01Icon,
-  ChartLineData01Icon,
-  Package01Icon,
-  Alert02Icon,
-} from "@hugeicons/core-free-icons";
+import { CheckmarkCircle02Icon } from "@hugeicons/core-free-icons";
+import { formatCurrency } from "@/lib/utils";
+import { PILLAR_META } from "@/lib/pillars";
+import type {
+  TransactionEmotion,
+  TransactionPillar,
+} from "@/core/transaction/domain/transaction.entity";
+import { updateTransactionEmotionAction } from "@/core/transaction/presentation/transaction.actions";
 import { ExpenseDetailDrawer } from "./expense-detail-drawer";
 
-export const pillarConfig = {
-  // Personal
-  survival: { label: "Supervivencia", icon: SparklesIcon },
-  optional: { label: "Opcional", icon: FlowerPotIcon },
-  culture: { label: "Cultura", icon: Book01Icon },
-  extras: { label: "Extras", icon: Coins01Icon },
-  // Business
-  operacion: { label: "Operación", icon: Building01Icon },
-  inversion: { label: "Inversión", icon: ChartLineData01Icon },
-  variable: { label: "Variable", icon: Package01Icon },
-  imprevisto: { label: "Imprevisto", icon: Alert02Icon },
-} as const;
+export type Pillar = TransactionPillar;
 
-export type Pillar = keyof typeof pillarConfig;
+const EMOTIONS: { value: TransactionEmotion; emoji: string; label: string }[] = [
+  { value: "happy", emoji: "😊", label: "Feliz" },
+  { value: "neutral", emoji: "😐", label: "Neutral" },
+  { value: "sad", emoji: "😕", label: "Triste" },
+];
 
 interface ExpenseCardProps {
+  id?: string;
   amount: number;
   category: string;
   note: string;
   pillar: Pillar;
   date: string;
+  emotion?: TransactionEmotion | null;
 }
 
 export function ExpenseCard({
+  id,
   amount,
   category,
   note,
   pillar,
   date,
+  emotion: initialEmotion = null,
 }: ExpenseCardProps) {
-  const config = pillarConfig[pillar];
+  const config = PILLAR_META[pillar];
+  const [emotion, setEmotion] = useState<TransactionEmotion | null>(initialEmotion);
+  const [, startTransition] = useTransition();
+
+  const handleEmotionSelect = (next: TransactionEmotion) => {
+    if (!id || next === emotion) return;
+    const prev = emotion;
+    setEmotion(next);
+    startTransition(async () => {
+      const result = await updateTransactionEmotionAction(id, next);
+      if (!result.success) {
+        console.error("[ExpenseCard] emotion update failed:", result.error);
+        setEmotion(prev);
+      }
+    });
+  };
 
   return (
     <ExpenseDetailDrawer expense={{ amount, category, note, pillar, date }}>
-      <button
-        type="button"
+      <div
+        role="button"
+        tabIndex={0}
         className="bg-card/70 backdrop-blur-sm border border-border/20 rounded-xl p-3.5 max-w-60 text-left cursor-pointer hover:bg-card/90 transition-colors"
       >
         <div className="flex items-center gap-2 mb-2.5">
@@ -72,7 +83,7 @@ export function ExpenseCard({
 
         <div className="mb-1.5">
           <span className="text-xl font-semibold text-foreground">
-            ${amount.toLocaleString()}
+            {formatCurrency(amount)}
           </span>
         </div>
 
@@ -80,7 +91,7 @@ export function ExpenseCard({
           {note}
         </p>
 
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 mb-2.5">
           <div className="flex items-center gap-1 bg-accent/40 rounded-full px-2 py-0.5">
             <HugeiconsIcon
               icon={config.icon}
@@ -97,7 +108,36 @@ export function ExpenseCard({
             </span>
           </div>
         </div>
-      </button>
+
+        {id && (
+          <div className="flex items-center gap-1.5 pt-2 border-t border-border/20">
+            <span className="text-[10px] text-muted-foreground/60 mr-0.5">
+              ¿Cómo te sentiste?
+            </span>
+            {EMOTIONS.map((e) => {
+              const active = emotion === e.value;
+              return (
+                <button
+                  key={e.value}
+                  type="button"
+                  aria-label={e.label}
+                  onClick={(ev) => {
+                    ev.stopPropagation();
+                    handleEmotionSelect(e.value);
+                  }}
+                  className={`w-6 h-6 rounded-full flex items-center justify-center text-sm leading-none transition-all ${
+                    active
+                      ? "bg-primary/15 scale-110"
+                      : "opacity-40 hover:opacity-100 hover:scale-105"
+                  }`}
+                >
+                  {e.emoji}
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </ExpenseDetailDrawer>
   );
 }

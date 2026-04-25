@@ -4,6 +4,9 @@ import { phoneNumber } from "better-auth/plugins";
 import { nextCookies } from "better-auth/next-js";
 import { db } from "@/lib/db";
 import * as authSchema from "@/lib/db/auth-schema";
+import { createOtpSender } from "@/core/otp/infrastructure/otp-sender.factory";
+
+const otpSender = createOtpSender();
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -18,11 +21,7 @@ export const auth = betterAuth({
   plugins: [
     phoneNumber({
       sendOTP: async ({ phoneNumber, code }) => {
-        if (process.env.NODE_ENV === "development") {
-          console.log(`[DEV OTP] ${phoneNumber} → ${code}`);
-          return;
-        }
-        // TODO: enviar código via WhatsApp Business API
+        await otpSender.send({ phoneNumber, code });
       },
       signUpOnVerification: {
         getTempEmail: (phone) => `${phone.replace("+", "")}@temp.cuentame.app`,

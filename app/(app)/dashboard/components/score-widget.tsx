@@ -23,28 +23,29 @@ function getLevel(score: number, type: LedgerType) {
   return { label, index, progress, nextMin: next?.min ?? null };
 }
 
-// Mock data — se reemplazará con datos reales
-const MOCK_SCORE = 340;
-const MOCK_STREAK = 5;
-const MOCK_TODAY_DONE = true;
-
 interface ScoreWidgetProps {
   ledgerType: LedgerType;
+  score?: number;
+  streak?: number;
+  activeDays?: Set<number>;
 }
 
-export function ScoreWidget({ ledgerType }: ScoreWidgetProps) {
-  const { label, index, progress, nextMin } = getLevel(MOCK_SCORE, ledgerType);
+export function ScoreWidget({
+  ledgerType,
+  score = 0,
+  streak = 0,
+  activeDays = new Set(),
+}: ScoreWidgetProps) {
+  const { label, index, progress, nextMin } = getLevel(score, ledgerType);
 
   const weekDays = ["L", "M", "X", "J", "V", "S", "D"];
-  // Mock: los últimos N días tienen registro
-  const activeDays = new Set([0, 1, 2, 3, 4]); // lunes a viernes
 
   return (
     <div className="bg-white rounded-xl px-3.5 py-2.5 flex items-center gap-3 shadow-sm">
       {/* Score */}
       <div className="flex items-center gap-1.5 shrink-0">
         <HugeiconsIcon icon={Award01Icon} size={13} className="text-primary" strokeWidth={1.5} />
-        <span className="text-sm font-semibold text-foreground">{MOCK_SCORE.toLocaleString()}</span>
+        <span className="text-sm font-semibold text-foreground">{score.toLocaleString()}</span>
         <span className="text-[9px] text-muted-foreground/70">pts</span>
       </div>
 
@@ -53,7 +54,7 @@ export function ScoreWidget({ ledgerType }: ScoreWidgetProps) {
         <div className="flex items-center justify-between">
           <span className="text-[9px] text-muted-foreground/70 truncate">Nv.{index + 1} · {label}</span>
           {nextMin && (
-            <span className="text-[9px] text-muted-foreground/60 shrink-0 ml-1">{nextMin - MOCK_SCORE} pts</span>
+            <span className="text-[9px] text-muted-foreground/60 shrink-0 ml-1">{nextMin - score} pts</span>
           )}
         </div>
         <div className="h-1 bg-border/30 rounded-full overflow-hidden">
@@ -67,7 +68,7 @@ export function ScoreWidget({ ledgerType }: ScoreWidgetProps) {
       {/* Streak */}
       <div className="flex items-center gap-1 bg-orange-50 rounded-full px-2 py-0.5 shrink-0">
         <HugeiconsIcon icon={FireIcon} size={11} className="text-orange-400" strokeWidth={1.5} />
-        <span className="text-[11px] font-semibold text-orange-500">{MOCK_STREAK}</span>
+        <span className="text-[11px] font-semibold text-orange-500">{streak}</span>
       </div>
 
       {/* Week dots */}
