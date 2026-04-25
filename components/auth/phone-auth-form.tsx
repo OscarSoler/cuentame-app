@@ -9,15 +9,23 @@ import {
 } from "@/components/ui/input-otp";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { SmartPhone01Icon } from "@hugeicons/core-free-icons";
-import { authClient } from "@/lib/auth-client";
+import { sendPhoneOtpAction } from "@/core/auth/presentation/auth.actions";
+
+export type VerifyResult =
+  | { success: true; hasLedgers?: boolean }
+  | { success: false; error: string };
 
 interface PhoneAuthFormProps {
-  onVerified: () => Promise<void> | void;
+  onVerify: (
+    phoneNumber: string,
+    code: string,
+  ) => Promise<VerifyResult | void>;
+  onSuccess?: (result: { hasLedgers?: boolean }) => Promise<void> | void;
 }
 
 type SubStep = "phone" | "otp";
 
-export function PhoneAuthForm({ onVerified }: PhoneAuthFormProps) {
+export function PhoneAuthForm({ onVerify, onSuccess }: PhoneAuthFormProps) {
   const [subStep, setSubStep] = useState<SubStep>("phone");
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
@@ -34,12 +42,10 @@ export function PhoneAuthForm({ onVerified }: PhoneAuthFormProps) {
     }
     const normalized = `+${digitsOnly}`;
     setLoading(true);
-    const { error: err } = await authClient.phoneNumber.sendOtp({
-      phoneNumber: normalized,
-    });
+    const result = await sendPhoneOtpAction(normalized);
     setLoading(false);
-    if (err) {
-      setError(err.message ?? "No se pudo enviar el código");
+    if (!result.success) {
+      setError(result.error);
       return;
     }
     setPhone(normalized);
@@ -50,24 +56,23 @@ export function PhoneAuthForm({ onVerified }: PhoneAuthFormProps) {
     if (loading) return;
     setError("");
     setLoading(true);
-    try {
-      const { error: err } = await authClient.phoneNumber.verify({
-        phoneNumber: phone,
-        code,
-      });
-      if (err) {
-        console.error("[phone verify] error:", err);
-        setLoading(false);
-        setError(err.message === "Invalid OTP" ? "Código incorrecto o expirado" : err.message ?? "Código incorrecto");
-        setOtp("");
-        return;
-      }
-      await onVerified();
-    } catch (e) {
-      console.error("[phone verify] threw:", e);
+    const result = await onVerify(phone, code);
+
+    if (!result) return;
+
+    if (!result.success) {
       setLoading(false);
-      setError(e instanceof Error ? e.message : "Error al verificar");
+      setError(
+        result.error === "Invalid OTP"
+          ? "Código incorrecto o expirado"
+          : result.error,
+      );
       setOtp("");
+      return;
+    }
+
+    if (onSuccess) {
+      await onSuccess({ hasLedgers: result.hasLedgers });
     }
   };
 

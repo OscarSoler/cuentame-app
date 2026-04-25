@@ -1,16 +1,14 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { PhoneAuthForm } from "@/components/auth/phone-auth-form";
-import { hasUserLedgers } from "@/components/auth/has-user-ledgers";
+import { loginPhoneAction } from "@/core/auth/presentation/auth.actions";
 
 export function LoginPhoneForm() {
-  const router = useRouter();
   return (
     <PhoneAuthForm
-      onVerified={async () => {
-        const exists = await hasUserLedgers();
-        router.replace(exists ? "/dashboard" : "/");
+      onVerify={async (phoneNumber, code) => {
+        const result = await loginPhoneAction({ phoneNumber, code });
+        return result;
       }}
     />
   );
