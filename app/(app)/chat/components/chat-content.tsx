@@ -11,6 +11,7 @@ import {
 import { ChatSuggestions } from "./chat-suggestions";
 import { ChatMessages } from "./chat-messages";
 import { ChatInput } from "./chat-input";
+import { ChatSkeleton } from "./chat-skeleton";
 
 interface ChatContentProps {
   variant?: "page" | "drawer";
@@ -60,7 +61,7 @@ export function ChatContent({ variant = "page" }: ChatContentProps) {
     };
   }, [activeLedger.id]);
 
-  if (state.status === "loading") return null;
+  if (state.status === "loading") return <ChatSkeleton isDrawer={variant === "drawer"} />;
   if (state.status === "error") {
     console.error("[ChatContent] hydration error:", state.error);
     return null;

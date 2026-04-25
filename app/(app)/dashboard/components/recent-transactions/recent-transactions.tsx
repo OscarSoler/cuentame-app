@@ -42,6 +42,7 @@ export function RecentTransactions({ transactions }: RecentTransactionsProps) {
           const meta = tx.pillar ? PILLAR_META[tx.pillar] : null;
           const Icon = meta?.icon ?? (isIncome ? ArrowDown01Icon : ArrowUp01Icon);
           const accentColor = meta?.color ?? (isIncome ? "#2D5016" : "#A67B5B");
+          const blobColor = isIncome ? accentColor : "#B44040";
 
           return (
             <div
@@ -49,8 +50,8 @@ export function RecentTransactions({ transactions }: RecentTransactionsProps) {
               className="relative overflow-hidden bg-white rounded-2xl shadow-sm border border-border/10"
             >
               <span
-                className="absolute -right-8 -top-8 w-20 h-20 rounded-full opacity-[0.06]"
-                style={{ backgroundColor: accentColor }}
+                className="absolute -right-8 -top-8 w-20 h-20 rounded-full opacity-[0.08]"
+                style={{ backgroundColor: blobColor }}
               />
 
               <div className="relative flex items-center gap-3 px-3.5 py-3">

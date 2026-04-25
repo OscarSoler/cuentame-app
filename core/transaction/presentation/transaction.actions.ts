@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { requireSession, wrapAction } from "@/core/_shared/action";
 import { DrizzleTransactionRepository } from "../infrastructure/drizzle-transaction.repository";
 import {
@@ -76,7 +75,6 @@ export async function createTransactionAction(input: CreateTransactionInput) {
       taxType: input.taxType ?? null,
       taxAmount: input.taxAmount ?? null,
     });
-    revalidatePath("/dashboard");
     return { id: tx.id };
   });
 }
@@ -102,7 +100,6 @@ export async function updateTransactionAction(id: string, input: UpdateTransacti
     const updates: UpdateTransactionData = { ...rest };
     if (date !== undefined) updates.date = new Date(date);
     const tx = await useCases().update.execute(id, updates);
-    revalidatePath("/dashboard");
     return { id: tx.id };
   });
 }
@@ -114,7 +111,6 @@ export async function updateTransactionEmotionAction(
   return wrapAction(async () => {
     await requireSession();
     await useCases().update.execute(id, { emotion });
-    revalidatePath("/dashboard");
     return { id };
   });
 }
@@ -123,7 +119,6 @@ export async function deleteTransactionAction(id: string) {
   return wrapAction(async () => {
     await requireSession();
     await useCases().delete.execute(id);
-    revalidatePath("/dashboard");
     return { id };
   });
 }
