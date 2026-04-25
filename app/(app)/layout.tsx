@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { BottomTabs } from "@/components/navigation/bottom-tabs";
 import { LedgerProvider } from "@/lib/context/ledger-context";
 import type { Ledger } from "@/lib/ledger/types";
+import { readStoredLedgerType } from "@/lib/ledger/preference.server";
 import { getUserLedgersAction } from "@/core/ledger/presentation/ledger.actions";
 
 export default async function AppLayout({
@@ -16,8 +17,11 @@ export default async function AppLayout({
   }
 
   const ledgers: Ledger[] = result.data;
+  const storedType = await readStoredLedgerType();
   const initialLedger =
-    ledgers.find((l) => l.type === "personal") ?? ledgers[0];
+    (storedType && ledgers.find((l) => l.type === storedType)) ??
+    ledgers.find((l) => l.type === "personal") ??
+    ledgers[0];
 
   return (
     <LedgerProvider ledgers={ledgers} initialLedger={initialLedger}>

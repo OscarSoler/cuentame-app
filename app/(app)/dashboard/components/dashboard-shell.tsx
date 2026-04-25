@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import type { Ledger, LedgerType } from "@/lib/context/ledger-context";
+import { setStoredLedgerType } from "@/lib/ledger/preference";
 import { BalanceHeader } from "./balance-header";
 import { LedgerTabs } from "./ledger-tabs";
 import { ScoreWidget } from "./score-widget";
@@ -46,6 +47,7 @@ export function DashboardShell({
   const handleLedgerChange = (type: LedgerType) => {
     if (type === activeLedger.type) return;
     if (!ledgers.some((l) => l.type === type)) return;
+    setStoredLedgerType(type);
     pushParams({ ledger: type });
   };
 

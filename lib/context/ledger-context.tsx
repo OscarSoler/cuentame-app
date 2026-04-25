@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState } from "react";
 import type { Ledger, LedgerType } from "@/lib/ledger/types";
+import { setStoredLedgerType } from "@/lib/ledger/preference";
 
 export type { Ledger, LedgerType } from "@/lib/ledger/types";
 export { isLedgerType } from "@/lib/ledger/types";
@@ -29,7 +30,9 @@ export function LedgerProvider({
 
   const switchType = (type: LedgerType) => {
     const next = ledgers.find((l) => l.type === type);
-    if (next && next.id !== activeLedger.id) setActiveLedger(next);
+    if (!next || next.id === activeLedger.id) return;
+    setActiveLedger(next);
+    setStoredLedgerType(type);
   };
 
   return (

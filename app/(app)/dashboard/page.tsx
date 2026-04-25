@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { getUserLedgersAction } from "@/core/ledger/presentation/ledger.actions";
 import { isLedgerType } from "@/lib/ledger/types";
+import { readStoredLedgerType } from "@/lib/ledger/preference.server";
 import { DashboardShell } from "./components/dashboard-shell";
 import { SummarySection } from "./components/sections/summary-section";
 import { ChartSection } from "./components/sections/chart-section";
@@ -29,7 +30,10 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   }
   const ledgers = ledgersResult.data;
 
-  const requestedType = isLedgerType(params.ledger) ? params.ledger : "personal";
+  const storedType = await readStoredLedgerType();
+  const requestedType = isLedgerType(params.ledger)
+    ? params.ledger
+    : (storedType ?? "personal");
   const activeLedger =
     ledgers.find((l) => l.type === requestedType) ?? ledgers[0];
 
