@@ -19,6 +19,7 @@
     "@hugeicons/core-free-icons": "^4.1.1",
     "@hugeicons/react": "^1.1.6",
     "@radix-ui/react-visually-hidden": "^1.2.4",
+    "@supabase/supabase-js": "^2.105.0",
     "ai": "^6.0.149",
     "better-auth": "^1.6.2",
     "class-variance-authority": "^0.7.1",

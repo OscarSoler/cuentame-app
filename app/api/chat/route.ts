@@ -72,8 +72,14 @@ export async function POST(req: Request) {
     tools: tools as Record<string, Tool<unknown, unknown>>,
   });
 
+  const hasImage = messages.some((m) =>
+    m.parts.some(
+      (p) => p.type === "file" && p.mediaType?.startsWith("image/"),
+    ),
+  );
+
   const result = streamText({
-    model: openai("gpt-4.1-nano"),
+    model: openai(hasImage ? "gpt-4o-mini" : "gpt-4.1-nano"),
     system: getSystemPrompt(ledgerType),
     messages: await convertToModelMessages(messages),
     tools,

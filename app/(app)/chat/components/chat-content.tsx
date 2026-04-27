@@ -142,7 +142,22 @@ function ChatContentReady({
         isDrawer={isDrawer}
         isLoading={isLoading}
         activeLedgerType={ledgerType}
-        onSubmit={(text) => sendMessage({ text })}
+        onSubmit={({ text, attachment }) => {
+          if (attachment) {
+            const filePart = {
+              type: "file" as const,
+              mediaType: attachment.mediaType,
+              url: attachment.url,
+            };
+            if (text.trim()) {
+              sendMessage({ text, files: [filePart] });
+            } else {
+              sendMessage({ files: [filePart] });
+            }
+          } else {
+            sendMessage({ text });
+          }
+        }}
         onLedgerChange={onLedgerChange}
       />
     </div>

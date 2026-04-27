@@ -101,6 +101,23 @@ export function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
               >
                 <div className="flex flex-col gap-1.5 items-end max-w-[82%]">
                   {message.parts.map((part, i) => {
+                    if (part.type === "file" && part.mediaType?.startsWith("image/")) {
+                      return (
+                        <div
+                          key={`${message.id}-${i}`}
+                          className="rounded-2xl overflow-hidden max-w-[260px] shadow-[0_2px_8px_rgba(45,80,22,0.18)]"
+                        >
+                          <Image
+                            src={part.url}
+                            alt="Imagen adjunta"
+                            width={260}
+                            height={260}
+                            className="w-full h-auto object-cover"
+                            unoptimized
+                          />
+                        </div>
+                      );
+                    }
                     if (part.type === "text" && part.text) {
                       return (
                         <div

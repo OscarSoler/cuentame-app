@@ -2,7 +2,14 @@
 
 import { useRef, useEffect, useState } from "react";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { ArrowUp02Icon, ArrowDown01Icon, Home01Icon, Store01Icon } from "@hugeicons/core-free-icons";
+import {
+  ArrowUp02Icon,
+  ArrowDown01Icon,
+  Home01Icon,
+  Store01Icon,
+  PlusSignIcon,
+  Cancel01Icon,
+} from "@hugeicons/core-free-icons";
 import type { LedgerType } from "@/lib/context/ledger-context";
 
 const ledgerOptions = [
@@ -10,18 +17,28 @@ const ledgerOptions = [
   { id: "business-default", type: "business" as const, label: "Negocio", icon: Store01Icon },
 ];
 
+export interface AttachedImage {
+  url: string;
+  mediaType: string;
+}
+
 interface ChatInputProps {
   isDrawer: boolean;
   isLoading: boolean;
   activeLedgerType: LedgerType;
-  onSubmit: (text: string) => void;
+  onSubmit: (payload: { text: string; attachment: AttachedImage | null }) => void;
   onLedgerChange: (type: LedgerType) => void;
 }
 
 export function ChatInput({ isDrawer, isLoading, activeLedgerType, onSubmit, onLedgerChange }: ChatInputProps) {
   const [input, setInput] = useState("");
   const [ledgerOpen, setLedgerOpen] = useState(false);
+  const [attached, setAttached] = useState<AttachedImage | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -30,11 +47,56 @@ export function ChatInput({ isDrawer, isLoading, activeLedgerType, onSubmit, onL
     }
   }, [input]);
 
+  useEffect(() => {
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+    };
+  }, [previewUrl]);
+
+  const canSubmit = (input.trim().length > 0 || attached !== null) && !isLoading && !uploading;
+
   const handleSubmit = (e?: { preventDefault?: () => void }) => {
     e?.preventDefault?.();
-    if (!input.trim() || isLoading) return;
-    onSubmit(input);
+    if (!canSubmit) return;
+    onSubmit({ text: input, attachment: attached });
     setInput("");
+    clearAttachment();
+  };
+
+  const clearAttachment = () => {
+    setAttached(null);
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setPreviewUrl(null);
+    setUploadError(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const handleFilePick = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadError(null);
+    const localPreview = URL.createObjectURL(file);
+    setPreviewUrl(localPreview);
+    setUploading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/upload", { method: "POST", body: formData });
+      const json = await res.json();
+      if (!res.ok || !json.success) {
+        throw new Error(json.error || "Error al subir la imagen");
+      }
+      setAttached({ url: json.data.url, mediaType: json.data.mediaType });
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : "Error al subir");
+      URL.revokeObjectURL(localPreview);
+      setPreviewUrl(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    } finally {
+      setUploading(false);
+    }
   };
 
   const activeLedgerOption = ledgerOptions.find((l) => l.type === activeLedgerType) ?? ledgerOptions[0];
@@ -45,6 +107,32 @@ export function ChatInput({ isDrawer, isLoading, activeLedgerType, onSubmit, onL
         onSubmit={handleSubmit}
         className="flex flex-col gap-2 rounded-xl px-3 py-2.5 bg-white/50 backdrop-blur-xl shadow-[0_0_0_1px_rgba(45,80,22,0.08),0_2px_8px_rgba(45,80,22,0.04)] transition-shadow focus-within:shadow-[0_0_0_1px_rgba(45,80,22,0.2),0_4px_16px_rgba(45,80,22,0.06)]"
       >
+        {(previewUrl || uploadError) && (
+          <div className="flex items-center gap-2">
+            {previewUrl && (
+              <div className="relative w-16 h-16 rounded-lg overflow-hidden border border-border/40">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={previewUrl} alt="adjunto" className="w-full h-full object-cover" />
+                {uploading && (
+                  <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                    <span className="w-3 h-3 rounded-full bg-white/80 animate-pulse" />
+                  </div>
+                )}
+                <button
+                  type="button"
+                  onClick={clearAttachment}
+                  className="absolute top-0.5 right-0.5 w-5 h-5 rounded-full bg-black/60 text-white flex items-center justify-center cursor-pointer"
+                  aria-label="Quitar imagen"
+                >
+                  <HugeiconsIcon icon={Cancel01Icon} size={11} strokeWidth={2.5} />
+                </button>
+              </div>
+            )}
+            {uploadError && (
+              <span className="text-[11px] text-destructive/80">{uploadError}</span>
+            )}
+          </div>
+        )}
         <textarea
           ref={textareaRef}
           value={input}
@@ -60,50 +148,69 @@ export function ChatInput({ isDrawer, isLoading, activeLedgerType, onSubmit, onL
           className="flex-1 bg-transparent text-base text-foreground placeholder:text-muted-foreground/40 resize-none outline-none max-h-30 py-1 px-1 [font-size:16px]"
         />
         <div className="flex items-center justify-between">
-          <div className="relative">
+          <div className="flex items-center gap-2">
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setLedgerOpen(!ledgerOpen)}
+                className="flex items-center gap-1.5 bg-accent/30 hover:bg-accent/50 rounded-full pl-1.5 pr-2 py-1 transition-colors cursor-pointer"
+              >
+                <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center">
+                  <HugeiconsIcon icon={activeLedgerOption.icon} size={11} className="text-primary" strokeWidth={1.5} />
+                </div>
+                <span className="text-[11px] font-medium text-foreground/70">{activeLedgerOption.label}</span>
+                <HugeiconsIcon
+                  icon={ArrowDown01Icon}
+                  size={10}
+                  className={`text-muted-foreground/50 transition-transform ${ledgerOpen ? "rotate-180" : ""}`}
+                />
+              </button>
+              {ledgerOpen && (
+                <div className="absolute bottom-full left-0 mb-1.5 bg-white/90 backdrop-blur-xl rounded-lg shadow-[0_4px_20px_rgba(0,0,0,0.08)] border border-border/20 overflow-hidden min-w-32 z-50">
+                  {ledgerOptions.map((opt) => (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      onClick={() => {
+                        onLedgerChange(opt.type);
+                        setLedgerOpen(false);
+                      }}
+                      className={`flex items-center gap-2 w-full px-3 py-2 text-left transition-colors cursor-pointer ${
+                        activeLedgerType === opt.type ? "bg-primary/5" : "hover:bg-accent/20"
+                      }`}
+                    >
+                      <div className={`w-5 h-5 rounded-full flex items-center justify-center ${activeLedgerType === opt.type ? "bg-primary text-primary-foreground" : "bg-accent/40"}`}>
+                        <HugeiconsIcon icon={opt.icon} size={11} className={activeLedgerType === opt.type ? "text-primary-foreground" : "text-primary"} strokeWidth={1.5} />
+                      </div>
+                      <span className={`text-[11px] font-medium ${activeLedgerType === opt.type ? "text-primary" : "text-foreground/70"}`}>
+                        {opt.label}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
             <button
               type="button"
-              onClick={() => setLedgerOpen(!ledgerOpen)}
-              className="flex items-center gap-1.5 bg-accent/30 hover:bg-accent/50 rounded-full pl-1.5 pr-2 py-1 transition-colors cursor-pointer"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading || isLoading}
+              className="w-7 h-7 rounded-full bg-accent/30 hover:bg-accent/50 flex items-center justify-center cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              aria-label="Adjuntar foto"
             >
-              <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center">
-                <HugeiconsIcon icon={activeLedgerOption.icon} size={11} className="text-primary" strokeWidth={1.5} />
-              </div>
-              <span className="text-[11px] font-medium text-foreground/70">{activeLedgerOption.label}</span>
-              <HugeiconsIcon
-                icon={ArrowDown01Icon}
-                size={10}
-                className={`text-muted-foreground/50 transition-transform ${ledgerOpen ? "rotate-180" : ""}`}
-              />
+              <HugeiconsIcon icon={PlusSignIcon} size={14} className="text-foreground/60" strokeWidth={2} />
             </button>
-            {ledgerOpen && (
-              <div className="absolute bottom-full left-0 mb-1.5 bg-white/90 backdrop-blur-xl rounded-lg shadow-[0_4px_20px_rgba(0,0,0,0.08)] border border-border/20 overflow-hidden min-w-32 z-50">
-                {ledgerOptions.map((opt) => (
-                  <button
-                    key={opt.id}
-                    type="button"
-                    onClick={() => {
-                      onLedgerChange(opt.type);
-                      setLedgerOpen(false);
-                    }}
-                    className={`flex items-center gap-2 w-full px-3 py-2 text-left transition-colors cursor-pointer ${
-                      activeLedgerType === opt.type ? "bg-primary/5" : "hover:bg-accent/20"
-                    }`}
-                  >
-                    <div className={`w-5 h-5 rounded-full flex items-center justify-center ${activeLedgerType === opt.type ? "bg-primary text-primary-foreground" : "bg-accent/40"}`}>
-                      <HugeiconsIcon icon={opt.icon} size={11} className={activeLedgerType === opt.type ? "text-primary-foreground" : "text-primary"} strokeWidth={1.5} />
-                    </div>
-                    <span className={`text-[11px] font-medium ${activeLedgerType === opt.type ? "text-primary" : "text-foreground/70"}`}>
-                      {opt.label}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            )}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              onChange={handleFilePick}
+              className="hidden"
+            />
           </div>
           <button
             type="submit"
-            disabled={!input.trim() || isLoading}
+            disabled={!canSubmit}
             className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center shrink-0 disabled:opacity-15 transition-opacity cursor-pointer"
           >
             <HugeiconsIcon icon={ArrowUp02Icon} size={16} strokeWidth={2} />
