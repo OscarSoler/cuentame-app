@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { Button } from "@/components/ui/button";
 import { WelcomeStep } from "./components/welcome-step";
 import { PhilosophyStep } from "./components/philosophy-step";
 import { NameStep } from "./components/name-step";
@@ -45,21 +46,35 @@ export default function OnboardingPage() {
     setStep(6);
   };
 
+  const showLoginShortcut = step > 0 && step < 6;
+
   return (
     <div className="flex flex-col h-dvh w-full bg-transparent ">
-      <div className="flex justify-center gap-2 pt-5">
-        {Array.from({ length: totalSteps }, (_, i) => (
-          <div
-            key={i}
-            className={`h-1 rounded-full transition-all duration-300 ${
-              i === step
-                ? "w-5 bg-primary"
-                : i < step
-                  ? "w-1.5 bg-primary/30"
-                  : "w-1.5 bg-border/60"
-            }`}
-          />
-        ))}
+      <div className="relative flex justify-center items-center gap-2 pt-5 px-6">
+        <div className="flex gap-2">
+          {Array.from({ length: totalSteps }, (_, i) => (
+            <div
+              key={i}
+              className={`h-1 rounded-full transition-all duration-300 ${
+                i === step
+                  ? "w-5 bg-primary"
+                  : i < step
+                    ? "w-1.5 bg-primary/30"
+                    : "w-1.5 bg-border/60"
+              }`}
+            />
+          ))}
+        </div>
+        {showLoginShortcut && (
+          <Button
+            variant="secondary"
+            size="xs"
+            onClick={() => router.push("/login")}
+            className="absolute right-6"
+          >
+            Ya tengo cuenta
+          </Button>
+        )}
       </div>
 
       {step === 0 && <WelcomeStep onNext={() => setStep(1)} />}

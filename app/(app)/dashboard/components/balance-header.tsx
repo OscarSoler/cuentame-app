@@ -27,7 +27,7 @@ export function BalanceHeader({
 
   return (
     <div className="flex items-center justify-between">
-      <p className="font-accent text-xl font-semibold leading-none">
+      <p className="font-heading text-xl font-semibold leading-none">
         {displayName ? (
           <>Cuéntame, <span className="text-primary">{displayName}</span></>
         ) : (

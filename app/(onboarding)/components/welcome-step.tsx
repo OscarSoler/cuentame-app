@@ -18,7 +18,7 @@ export function WelcomeStep({ onNext }: StepProps) {
         <h1 className="font-heading text-3xl leading-snug text-foreground">
           Bienvenido a tu
           <br />
-          <span className="font-accent font-bold text-4xl">Santuario Financiero</span>
+          <span className="font-bold text-4xl">Santuario Financiero</span>
         </h1>
 
         <div className="flex items-center gap-1.5 bg-accent/40 text-accent-foreground px-3 py-1.5 rounded-full text-xs">

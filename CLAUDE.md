@@ -11,7 +11,7 @@
 | `models/` | `core/[feature]/` |
 | `components/` | `components/` (solo globales) |
 
-## Las 5 Reglas
+## Las 6 Reglas
 
 **1. La página es el controlador**
 `page.tsx` solo importa + compone. Sin datos mock, sin componentes inline, sin lógica de derivación.
@@ -36,6 +36,9 @@ Los componentes React nunca importan desde `infrastructure/` o `application/` di
 
 **5. Drawers/modals son del feature que los dispara**
 Viven en `[feature]/components/` junto al trigger. Subcarpeta solo si supera 3 archivos.
+
+**6. Reutiliza componentes y variantes existentes antes de inventar**
+Antes de escribir un `<button>`, `<input>`, etc. nativo o estilos custom, revisa `components/ui/` y usa el componente con la variante/`size` apropiados (`Button` tiene `default | outline | secondary | ghost | destructive | link` y `xs | sm | default | lg | icon*`). Solo crea estilos ad-hoc si ninguna variante encaja, y en ese caso considera añadir la variante al componente base en lugar de duplicar clases.
 
 ## Estructura de referencia
 
