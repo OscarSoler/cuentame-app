@@ -42,3 +42,9 @@ export function formatCurrencyCompact(amount: number): string {
   if (amount >= 1_000) return `$${(amount / 1_000).toFixed(0)}k`;
   return `$${amount}`;
 }
+
+export const APP_TIMEZONE = "America/Bogota";
+
+export function localDateISO(date: Date = new Date()): string {
+  return date.toLocaleDateString("en-CA", { timeZone: APP_TIMEZONE });
+}

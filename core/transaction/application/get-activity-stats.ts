@@ -1,5 +1,6 @@
 import { ActivityStats } from "../domain/streak.entity";
 import { TransactionRepository } from "../domain/transaction.repository";
+import { localDateISO } from "@/lib/utils";
 
 interface GetActivityStatsConfig {
   repository: TransactionRepository;
@@ -21,52 +22,53 @@ export class GetActivityStats {
     ]);
 
     const activeSet = new Set(activeDates);
-    const today = new Date();
+    const todayISO = localDateISO();
 
-    const currentStreak = computeCurrentStreak(activeSet, today);
-    const activeDaysThisWeek = computeActiveDaysThisWeek(activeSet, today);
+    const currentStreak = computeCurrentStreak(activeSet, todayISO);
+    const activeDaysThisWeek = computeActiveDaysThisWeek(activeSet, todayISO);
     const score = totalTxs * POINTS_PER_TRANSACTION + currentStreak * POINTS_PER_STREAK_DAY;
 
     return new ActivityStats({ score, currentStreak, activeDaysThisWeek });
   }
 }
 
-function toLocalISODate(date: Date): string {
-  // en-CA renders as YYYY-MM-DD in local timezone, matching how DATE columns are stored.
-  return date.toLocaleDateString("en-CA");
+function addDaysISO(iso: string, delta: number): string {
+  const [y, m, d] = iso.split("-").map(Number);
+  const date = new Date(Date.UTC(y, m - 1, d));
+  date.setUTCDate(date.getUTCDate() + delta);
+  return date.toISOString().slice(0, 10);
 }
 
-function addDays(date: Date, delta: number): Date {
-  const next = new Date(date);
-  next.setDate(next.getDate() + delta);
-  return next;
+function dayOfWeekISO(iso: string): number {
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(Date.UTC(y, m - 1, d)).getUTCDay();
 }
 
-function computeCurrentStreak(activeSet: Set<string>, today: Date): number {
-  let cursor = today;
-  if (!activeSet.has(toLocalISODate(cursor))) {
-    cursor = addDays(cursor, -1);
-    if (!activeSet.has(toLocalISODate(cursor))) return 0;
+function computeCurrentStreak(activeSet: Set<string>, todayISO: string): number {
+  let cursor = todayISO;
+  if (!activeSet.has(cursor)) {
+    cursor = addDaysISO(cursor, -1);
+    if (!activeSet.has(cursor)) return 0;
   }
 
   let streak = 0;
-  while (activeSet.has(toLocalISODate(cursor))) {
+  while (activeSet.has(cursor)) {
     streak += 1;
-    cursor = addDays(cursor, -1);
+    cursor = addDaysISO(cursor, -1);
   }
   return streak;
 }
 
-function computeActiveDaysThisWeek(activeSet: Set<string>, today: Date): number[] {
-  // JS getDay(): 0=Sun..6=Sat. We want Monday-first (0=Mon..6=Sun).
-  const dow = today.getDay();
+function computeActiveDaysThisWeek(activeSet: Set<string>, todayISO: string): number[] {
+  // getUTCDay(): 0=Sun..6=Sat. We want Monday-first (0=Mon..6=Sun).
+  const dow = dayOfWeekISO(todayISO);
   const offsetFromMonday = (dow + 6) % 7;
-  const monday = addDays(today, -offsetFromMonday);
+  const mondayISO = addDaysISO(todayISO, -offsetFromMonday);
 
   const active: number[] = [];
   for (let i = 0; i < 7; i += 1) {
-    const day = addDays(monday, i);
-    if (activeSet.has(toLocalISODate(day))) active.push(i);
+    const dayISO = addDaysISO(mondayISO, i);
+    if (activeSet.has(dayISO)) active.push(i);
   }
   return active;
 }

@@ -1,6 +1,7 @@
 import { tool } from "ai";
 import { z } from "zod";
 import { createTransactionAction } from "@/core/transaction/presentation/transaction.actions";
+import { localDateISO } from "@/lib/utils";
 
 interface ToolContext {
   ledgerId: string;
@@ -24,7 +25,7 @@ export function buildChatTools({ ledgerId, ledgerType }: ToolContext) {
         .describe("Pilar Kakebo: survival|optional|culture|extras (personal) o operacion|inversion|variable|imprevisto (negocio)"),
     }),
     execute: async ({ amount, category, note, pillar }) => {
-      const today = new Date().toISOString().split("T")[0];
+      const today = localDateISO();
       const result = await createTransactionAction({
         ledgerId,
         amount,
@@ -66,7 +67,7 @@ export function buildChatTools({ ledgerId, ledgerType }: ToolContext) {
         .describe("Si el monto ya incluye IVA (19%). True por defecto para ventas y servicios."),
     }),
     execute: async ({ amount, category, note, includesIva }) => {
-      const today = new Date().toISOString().split("T")[0];
+      const today = localDateISO();
       const applyIva = ledgerType === "business" && includesIva;
       const ivaAmount = applyIva ? Math.round((amount * 19) / 119) : 0;
 
