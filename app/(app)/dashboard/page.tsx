@@ -23,7 +23,9 @@ interface DashboardPageProps {
   }>;
 }
 
-export default async function DashboardPage({ searchParams }: DashboardPageProps) {
+export default async function DashboardPage({
+  searchParams,
+}: DashboardPageProps) {
   const params = (await searchParams) ?? {};
 
   const ledgersResult = await getUserLedgersAction();
@@ -49,7 +51,8 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
       ? jsMonthRaw
       : currentMonth;
   const yearRaw = Number(params.year);
-  const year = Number.isFinite(yearRaw) && yearRaw >= 1970 ? yearRaw : currentYear;
+  const year =
+    Number.isFinite(yearRaw) && yearRaw >= 1970 ? yearRaw : currentYear;
   const humanMonth = jsMonth + 1;
 
   const isBusiness = activeLedger.type === "business";
@@ -78,7 +81,10 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
     >
       {isCurrentMonth && (
         <Suspense key={`score-${activeLedger.id}`} fallback={<ScoreSkeleton />}>
-          <ScoreSection ledgerId={activeLedger.id} ledgerType={activeLedger.type} />
+          <ScoreSection
+            ledgerId={activeLedger.id}
+            ledgerType={activeLedger.type}
+          />
         </Suspense>
       )}
 
@@ -107,7 +113,11 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
       </Suspense>
 
       <Suspense key={`recent-${suspenseKey}`} fallback={<RecentSkeleton />}>
-        <RecentSection ledgerId={activeLedger.id} year={year} month={humanMonth} />
+        <RecentSection
+          ledgerId={activeLedger.id}
+          year={year}
+          month={humanMonth}
+        />
       </Suspense>
     </DashboardShell>
   );

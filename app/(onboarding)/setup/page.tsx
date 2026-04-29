@@ -38,7 +38,7 @@ export default function SetupPage() {
 
       setMessage("¡Todo listo!");
       await new Promise((r) => setTimeout(r, 600));
-      router.replace("/dashboard");
+      router.replace("/chat");
     }
 
     setup();
