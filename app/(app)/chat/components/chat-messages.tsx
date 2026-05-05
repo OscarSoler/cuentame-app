@@ -65,8 +65,8 @@ export function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
       if (part.output?.status === "error") {
         return <ToolError key={part.toolCallId} error={part.output.error} />;
       }
-      const { amount, category, note, date, ivaAmount } = part.output;
-      return <IncomeCard key={part.toolCallId} amount={amount} category={category} note={note} date={date} ivaAmount={ivaAmount} />;
+      const { id, amount, category, note, date, ivaAmount } = part.output;
+      return <IncomeCard key={part.toolCallId} id={id} amount={amount} category={category} note={note} date={date} ivaAmount={ivaAmount} />;
     }
     if ((part.type === "tool-registerExpense" || part.type === "tool-registerIncome") && part.state === "input-available") {
       return (

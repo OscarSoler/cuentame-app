@@ -13,6 +13,7 @@ const categoryLabels: Record<string, string> = {
 };
 
 interface IncomeCardProps {
+  id?: string;
   amount: number;
   category: string;
   note: string;
@@ -21,6 +22,7 @@ interface IncomeCardProps {
 }
 
 export function IncomeCard({
+  id,
   amount,
   category,
   note,
@@ -30,7 +32,16 @@ export function IncomeCard({
   const { activeLedger } = useLedger();
   const showIva = activeLedger.type === "business" && ivaAmount > 0;
   return (
-    <IncomeDetailDrawer income={{ amount, category, note, date, ivaAmount: showIva ? ivaAmount : 0 }}>
+    <IncomeDetailDrawer
+      income={{
+        id,
+        amount,
+        category,
+        note,
+        date,
+        ivaAmount: showIva ? ivaAmount : 0,
+      }}
+    >
       <div
         role="button"
         tabIndex={0}

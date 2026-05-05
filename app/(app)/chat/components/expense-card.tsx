@@ -57,7 +57,9 @@ export function ExpenseCard({
   };
 
   return (
-    <ExpenseDetailDrawer expense={{ amount, category, note, pillar, date }}>
+    <ExpenseDetailDrawer
+      expense={{ id, amount, category, note, pillar, date, emotion }}
+    >
       <div
         role="button"
         tabIndex={0}

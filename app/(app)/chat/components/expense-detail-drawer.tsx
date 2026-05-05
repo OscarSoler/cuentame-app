@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import {
   Drawer,
   DrawerContent,
@@ -18,37 +18,45 @@ import {
 } from "@hugeicons/core-free-icons";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { PILLAR_META } from "@/lib/pillars";
-import type { TransactionPillar as Pillar } from "@/core/transaction/domain/transaction.entity";
+import type {
+  TransactionEmotion,
+  TransactionPillar as Pillar,
+} from "@/core/transaction/domain/transaction.entity";
 import { useLedger } from "@/lib/context/ledger-context";
+import {
+  deleteTransactionAction,
+  updateTransactionAction,
+} from "@/core/transaction/presentation/transaction.actions";
 
 const personalPillarKeys: Pillar[] = ["survival", "optional", "culture", "extras"];
 const businessPillarKeys: Pillar[] = ["operacion", "inversion", "variable", "imprevisto"];
 
-const emotions = [
+const emotions: { value: TransactionEmotion; emoji: string }[] = [
   { value: "happy", emoji: "😊" },
   { value: "neutral", emoji: "😐" },
   { value: "sad", emoji: "😔" },
-  { value: "guilty", emoji: "😬" },
-  { value: "proud", emoji: "🤩" },
-] as const;
+];
 
 interface ExpenseData {
+  id?: string;
   amount: number;
   category: string;
   note: string;
   pillar: Pillar;
   date: string;
-  emotion?: string;
+  emotion?: TransactionEmotion | null;
 }
 
 interface ExpenseDetailDrawerProps {
   expense: ExpenseData;
   children: React.ReactNode;
+  onDeleted?: () => void;
 }
 
 export function ExpenseDetailDrawer({
   expense,
   children,
+  onDeleted,
 }: ExpenseDetailDrawerProps) {
   const { activeLedger } = useLedger();
   const [open, setOpen] = useState(false);
@@ -56,13 +64,57 @@ export function ExpenseDetailDrawer({
   const [category, setCategory] = useState(expense.category);
   const [note, setNote] = useState(expense.note);
   const [pillar, setPillar] = useState<Pillar>(expense.pillar);
-  const [emotion, setEmotion] = useState(expense.emotion ?? "");
+  const [emotion, setEmotion] = useState<TransactionEmotion | "">(
+    expense.emotion ?? "",
+  );
+  const [error, setError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
 
-  const pillarKeys = activeLedger.type === "business" ? businessPillarKeys : personalPillarKeys;
+  const pillarKeys =
+    activeLedger.type === "business" ? businessPillarKeys : personalPillarKeys;
 
   const handleSave = () => {
-    // TODO: persist changes
-    setOpen(false);
+    if (!expense.id) {
+      setError("Falta el id de la transacción");
+      return;
+    }
+    const parsedAmount = Number(amount);
+    if (!Number.isFinite(parsedAmount) || parsedAmount <= 0) {
+      setError("El monto debe ser mayor a 0");
+      return;
+    }
+    setError(null);
+    startTransition(async () => {
+      const result = await updateTransactionAction(expense.id!, {
+        amount: parsedAmount,
+        category: category.trim() || null,
+        note: note.trim() || null,
+        pillar,
+        emotion: emotion === "" ? null : emotion,
+      });
+      if (!result.success) {
+        setError(result.error);
+        return;
+      }
+      setOpen(false);
+    });
+  };
+
+  const handleDelete = () => {
+    if (!expense.id) {
+      setError("Falta el id de la transacción");
+      return;
+    }
+    setError(null);
+    startTransition(async () => {
+      const result = await deleteTransactionAction(expense.id!);
+      if (!result.success) {
+        setError(result.error);
+        return;
+      }
+      setOpen(false);
+      onDeleted?.();
+    });
   };
 
   return (
@@ -198,7 +250,9 @@ export function ExpenseDetailDrawer({
                 <button
                   key={e.value}
                   type="button"
-                  onClick={() => setEmotion(e.value)}
+                  onClick={() =>
+                    setEmotion((prev) => (prev === e.value ? "" : e.value))
+                  }
                   className={`w-11 h-11 flex items-center justify-center rounded-full text-lg transition-all cursor-pointer ${
                     emotion === e.value
                       ? "bg-primary/10 ring-1.5 ring-primary/30 scale-110"
@@ -211,14 +265,27 @@ export function ExpenseDetailDrawer({
             </div>
           </div>
 
+          {error && (
+            <p className="text-[11px] text-destructive text-center">{error}</p>
+          )}
+
           {/* Actions */}
           <div className="flex gap-2.5 pt-1">
-            <Button variant="destructive" onClick={() => setOpen(false)} className="flex-1">
+            <Button
+              variant="destructive"
+              onClick={handleDelete}
+              disabled={isPending || !expense.id}
+              className="flex-1"
+            >
               <HugeiconsIcon icon={Delete02Icon} size={14} />
               Eliminar
             </Button>
-            <Button onClick={handleSave} className="flex-1">
-              Guardar
+            <Button
+              onClick={handleSave}
+              disabled={isPending || !expense.id}
+              className="flex-1"
+            >
+              {isPending ? "Guardando..." : "Guardar"}
             </Button>
           </div>
         </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import {
   Drawer,
   DrawerContent,
@@ -19,6 +19,10 @@ import {
 } from "@hugeicons/core-free-icons";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { formatCurrency } from "@/lib/utils";
+import {
+  deleteTransactionAction,
+  updateTransactionAction,
+} from "@/core/transaction/presentation/transaction.actions";
 
 const categoryOptions = [
   { value: "ventas", label: "Ventas" },
@@ -27,6 +31,7 @@ const categoryOptions = [
 ] as const;
 
 interface IncomeData {
+  id?: string;
   amount: number;
   category: string;
   note: string;
@@ -37,17 +42,61 @@ interface IncomeData {
 interface IncomeDetailDrawerProps {
   income: IncomeData;
   children: React.ReactNode;
+  onDeleted?: () => void;
 }
 
-export function IncomeDetailDrawer({ income, children }: IncomeDetailDrawerProps) {
+export function IncomeDetailDrawer({
+  income,
+  children,
+  onDeleted,
+}: IncomeDetailDrawerProps) {
   const [open, setOpen] = useState(false);
   const [amount, setAmount] = useState(income.amount.toString());
   const [category, setCategory] = useState(income.category);
   const [note, setNote] = useState(income.note);
+  const [error, setError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
 
   const handleSave = () => {
-    // TODO: persist changes
-    setOpen(false);
+    if (!income.id) {
+      setError("Falta el id de la transacción");
+      return;
+    }
+    const parsedAmount = Number(amount);
+    if (!Number.isFinite(parsedAmount) || parsedAmount <= 0) {
+      setError("El monto debe ser mayor a 0");
+      return;
+    }
+    setError(null);
+    startTransition(async () => {
+      const result = await updateTransactionAction(income.id!, {
+        amount: parsedAmount,
+        category: category.trim() || null,
+        note: note.trim() || null,
+      });
+      if (!result.success) {
+        setError(result.error);
+        return;
+      }
+      setOpen(false);
+    });
+  };
+
+  const handleDelete = () => {
+    if (!income.id) {
+      setError("Falta el id de la transacción");
+      return;
+    }
+    setError(null);
+    startTransition(async () => {
+      const result = await deleteTransactionAction(income.id!);
+      if (!result.success) {
+        setError(result.error);
+        return;
+      }
+      setOpen(false);
+      onDeleted?.();
+    });
   };
 
   return (
@@ -158,13 +207,26 @@ export function IncomeDetailDrawer({ income, children }: IncomeDetailDrawerProps
             </div>
           </div>
 
+          {error && (
+            <p className="text-[11px] text-destructive text-center">{error}</p>
+          )}
+
           <div className="flex gap-2.5 pt-1">
-            <Button variant="destructive" onClick={() => setOpen(false)} className="flex-1">
+            <Button
+              variant="destructive"
+              onClick={handleDelete}
+              disabled={isPending || !income.id}
+              className="flex-1"
+            >
               <HugeiconsIcon icon={Delete02Icon} size={14} />
               Eliminar
             </Button>
-            <Button onClick={handleSave} className="flex-1">
-              Guardar
+            <Button
+              onClick={handleSave}
+              disabled={isPending || !income.id}
+              className="flex-1"
+            >
+              {isPending ? "Guardando..." : "Guardar"}
             </Button>
           </div>
         </div>
