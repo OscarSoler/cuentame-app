@@ -1,6 +1,10 @@
 "use server";
 
 import { requireSession, wrapAction } from "@/core/_shared/action";
+import {
+  assertLedgerOwnership,
+  assertTransactionOwnership,
+} from "@/core/_shared/ownership";
 import { DrizzleTransactionRepository } from "../infrastructure/drizzle-transaction.repository";
 import {
   CreateTransaction,
@@ -64,7 +68,8 @@ export interface CreateTransactionInput {
 
 export async function createTransactionAction(input: CreateTransactionInput) {
   return wrapAction(async () => {
-    await requireSession();
+    const session = await requireSession();
+    await assertLedgerOwnership(session.user.id, input.ledgerId);
     const tx = await useCases().create.execute({
       ...input,
       date: new Date(input.date),
@@ -97,7 +102,8 @@ export interface UpdateTransactionInput {
 
 export async function updateTransactionAction(id: string, input: UpdateTransactionInput) {
   return wrapAction(async () => {
-    await requireSession();
+    const session = await requireSession();
+    await assertTransactionOwnership(session.user.id, id);
     const { date, ...rest } = input;
     const updates: UpdateTransactionData = { ...rest };
     if (date !== undefined) updates.date = new Date(date);
@@ -111,7 +117,8 @@ export async function updateTransactionEmotionAction(
   emotion: TransactionEmotion | null,
 ) {
   return wrapAction(async () => {
-    await requireSession();
+    const session = await requireSession();
+    await assertTransactionOwnership(session.user.id, id);
     await useCases().update.execute(id, { emotion });
     return { id };
   });
@@ -119,7 +126,8 @@ export async function updateTransactionEmotionAction(
 
 export async function deleteTransactionAction(id: string) {
   return wrapAction(async () => {
-    await requireSession();
+    const session = await requireSession();
+    await assertTransactionOwnership(session.user.id, id);
     await useCases().delete.execute(id);
     return { id };
   });
@@ -127,7 +135,8 @@ export async function deleteTransactionAction(id: string) {
 
 export async function getRecentTransactionsAction(ledgerId: string, limit = 10) {
   return wrapAction(async () => {
-    await requireSession();
+    const session = await requireSession();
+    await assertLedgerOwnership(session.user.id, ledgerId);
     const txs = await useCases().get.recent(ledgerId, limit);
     return txs.map(toDTO);
   });
@@ -140,7 +149,8 @@ export async function getRecentTransactionsByMonthAction(
   limit = 10,
 ) {
   return wrapAction(async () => {
-    await requireSession();
+    const session = await requireSession();
+    await assertLedgerOwnership(session.user.id, ledgerId);
     const txs = await useCases().get.recentByMonth(ledgerId, year, month, limit);
     return txs.map(toDTO);
   });
@@ -148,35 +158,40 @@ export async function getRecentTransactionsByMonthAction(
 
 export async function getMonthSummaryAction(ledgerId: string, year: number, month: number) {
   return wrapAction(async () => {
-    await requireSession();
+    const session = await requireSession();
+    await assertLedgerOwnership(session.user.id, ledgerId);
     return useCases().get.monthSummary(ledgerId, year, month);
   });
 }
 
 export async function getPillarsSpentAction(ledgerId: string, year: number, month: number) {
   return wrapAction(async () => {
-    await requireSession();
+    const session = await requireSession();
+    await assertLedgerOwnership(session.user.id, ledgerId);
     return useCases().get.pillarsSpentByMonth(ledgerId, year, month);
   });
 }
 
 export async function getWeeklyTotalsAction(ledgerId: string, year: number, month: number) {
   return wrapAction(async () => {
-    await requireSession();
+    const session = await requireSession();
+    await assertLedgerOwnership(session.user.id, ledgerId);
     return useCases().get.weeklyTotalsByMonth(ledgerId, year, month);
   });
 }
 
 export async function getDailyTotalsAction(ledgerId: string, days = 7) {
   return wrapAction(async () => {
-    await requireSession();
+    const session = await requireSession();
+    await assertLedgerOwnership(session.user.id, ledgerId);
     return useCases().get.dailyTotalsLastNDays(ledgerId, days);
   });
 }
 
 export async function getActivityStatsAction(ledgerId: string) {
   return wrapAction(async () => {
-    await requireSession();
+    const session = await requireSession();
+    await assertLedgerOwnership(session.user.id, ledgerId);
     const stats = await useCases().activityStats.byLedger(ledgerId);
     return {
       score: stats.score,

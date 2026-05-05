@@ -29,7 +29,7 @@ export default defineConfig({
   webServer: {
     command: `next dev -p ${PORT}`,
     url: BASE_URL,
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: false,
     timeout: 120_000,
     cwd: path.resolve(__dirname, ".."),
     env: {
