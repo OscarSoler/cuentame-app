@@ -9,6 +9,8 @@ import {
   Store01Icon,
   PlusSignIcon,
   Cancel01Icon,
+  Camera01Icon,
+  Image01Icon,
 } from "@hugeicons/core-free-icons";
 import type { LedgerType } from "@/lib/context/ledger-context";
 
@@ -33,12 +35,14 @@ interface ChatInputProps {
 export function ChatInput({ isDrawer, isLoading, activeLedgerType, onSubmit, onLedgerChange }: ChatInputProps) {
   const [input, setInput] = useState("");
   const [ledgerOpen, setLedgerOpen] = useState(false);
+  const [attachOpen, setAttachOpen] = useState(false);
   const [attached, setAttached] = useState<AttachedImage | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -68,7 +72,8 @@ export function ChatInput({ isDrawer, isLoading, activeLedgerType, onSubmit, onL
     if (previewUrl) URL.revokeObjectURL(previewUrl);
     setPreviewUrl(null);
     setUploadError(null);
-    if (fileInputRef.current) fileInputRef.current.value = "";
+    if (cameraInputRef.current) cameraInputRef.current.value = "";
+    if (galleryInputRef.current) galleryInputRef.current.value = "";
   };
 
   const handleFilePick = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -93,7 +98,8 @@ export function ChatInput({ isDrawer, isLoading, activeLedgerType, onSubmit, onL
       setUploadError(err instanceof Error ? err.message : "Error al subir");
       URL.revokeObjectURL(localPreview);
       setPreviewUrl(null);
-      if (fileInputRef.current) fileInputRef.current.value = "";
+      if (cameraInputRef.current) cameraInputRef.current.value = "";
+      if (galleryInputRef.current) galleryInputRef.current.value = "";
     } finally {
       setUploading(false);
     }
@@ -153,20 +159,20 @@ export function ChatInput({ isDrawer, isLoading, activeLedgerType, onSubmit, onL
               <button
                 type="button"
                 onClick={() => setLedgerOpen(!ledgerOpen)}
-                className="flex items-center gap-1.5 bg-accent/30 hover:bg-accent/50 rounded-full pl-1.5 pr-2 py-1 transition-colors cursor-pointer"
+                className="flex items-center gap-2 bg-accent/30 hover:bg-accent/50 rounded-full pl-2 pr-3 py-1.5 transition-colors cursor-pointer"
               >
-                <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center">
-                  <HugeiconsIcon icon={activeLedgerOption.icon} size={11} className="text-primary" strokeWidth={1.5} />
+                <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
+                  <HugeiconsIcon icon={activeLedgerOption.icon} size={13} className="text-primary" strokeWidth={1.6} />
                 </div>
-                <span className="text-[11px] font-medium text-foreground/70">{activeLedgerOption.label}</span>
+                <span className="text-[12.5px] font-medium text-foreground/80">{activeLedgerOption.label}</span>
                 <HugeiconsIcon
                   icon={ArrowDown01Icon}
-                  size={10}
+                  size={11}
                   className={`text-muted-foreground/50 transition-transform ${ledgerOpen ? "rotate-180" : ""}`}
                 />
               </button>
               {ledgerOpen && (
-                <div className="absolute bottom-full left-0 mb-1.5 bg-white/90 backdrop-blur-xl rounded-lg shadow-[0_4px_20px_rgba(0,0,0,0.08)] border border-border/20 overflow-hidden min-w-32 z-50">
+                <div className="absolute bottom-full left-0 mb-2 bg-white/95 backdrop-blur-xl rounded-xl shadow-[0_8px_28px_rgba(45,80,22,0.12)] border border-border/20 overflow-hidden min-w-36 z-50">
                   {ledgerOptions.map((opt) => (
                     <button
                       key={opt.id}
@@ -175,14 +181,14 @@ export function ChatInput({ isDrawer, isLoading, activeLedgerType, onSubmit, onL
                         onLedgerChange(opt.type);
                         setLedgerOpen(false);
                       }}
-                      className={`flex items-center gap-2 w-full px-3 py-2 text-left transition-colors cursor-pointer ${
+                      className={`flex items-center gap-2.5 w-full px-3 py-2.5 text-left transition-colors cursor-pointer ${
                         activeLedgerType === opt.type ? "bg-primary/5" : "hover:bg-accent/20"
                       }`}
                     >
-                      <div className={`w-5 h-5 rounded-full flex items-center justify-center ${activeLedgerType === opt.type ? "bg-primary text-primary-foreground" : "bg-accent/40"}`}>
-                        <HugeiconsIcon icon={opt.icon} size={11} className={activeLedgerType === opt.type ? "text-primary-foreground" : "text-primary"} strokeWidth={1.5} />
+                      <div className={`w-6 h-6 rounded-full flex items-center justify-center ${activeLedgerType === opt.type ? "bg-primary text-primary-foreground" : "bg-accent/40"}`}>
+                        <HugeiconsIcon icon={opt.icon} size={13} className={activeLedgerType === opt.type ? "text-primary-foreground" : "text-primary"} strokeWidth={1.6} />
                       </div>
-                      <span className={`text-[11px] font-medium ${activeLedgerType === opt.type ? "text-primary" : "text-foreground/70"}`}>
+                      <span className={`text-[12.5px] font-medium ${activeLedgerType === opt.type ? "text-primary" : "text-foreground/80"}`}>
                         {opt.label}
                       </span>
                     </button>
@@ -190,20 +196,77 @@ export function ChatInput({ isDrawer, isLoading, activeLedgerType, onSubmit, onL
                 </div>
               )}
             </div>
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={uploading || isLoading}
-              className="w-7 h-7 rounded-full bg-accent/30 hover:bg-accent/50 flex items-center justify-center cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-              aria-label="Adjuntar foto"
-            >
-              <HugeiconsIcon icon={PlusSignIcon} size={14} className="text-foreground/60" strokeWidth={2} />
-            </button>
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setAttachOpen((v) => !v)}
+                disabled={uploading || isLoading}
+                className="w-9 h-9 rounded-full bg-accent/30 hover:bg-accent/50 flex items-center justify-center cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                aria-label="Adjuntar foto"
+                aria-expanded={attachOpen}
+              >
+                <HugeiconsIcon
+                  icon={PlusSignIcon}
+                  size={16}
+                  className={`text-foreground/70 transition-transform duration-200 ${attachOpen ? "rotate-45" : ""}`}
+                  strokeWidth={2}
+                />
+              </button>
+              {attachOpen && (
+                <>
+                  <button
+                    type="button"
+                    aria-hidden
+                    onClick={() => setAttachOpen(false)}
+                    className="fixed inset-0 z-40 cursor-default"
+                  />
+                  <div className="absolute bottom-full left-0 mb-2 bg-white/95 backdrop-blur-xl rounded-xl shadow-[0_8px_28px_rgba(45,80,22,0.12)] border border-border/20 overflow-hidden min-w-44 z-50">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAttachOpen(false);
+                        cameraInputRef.current?.click();
+                      }}
+                      className="flex items-center gap-2.5 w-full px-3 py-2.5 text-left transition-colors cursor-pointer hover:bg-accent/20"
+                    >
+                      <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
+                        <HugeiconsIcon icon={Camera01Icon} size={13} className="text-primary" strokeWidth={1.6} />
+                      </div>
+                      <span className="text-[12.5px] font-medium text-foreground/80">
+                        Tomar foto
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAttachOpen(false);
+                        galleryInputRef.current?.click();
+                      }}
+                      className="flex items-center gap-2.5 w-full px-3 py-2.5 text-left transition-colors cursor-pointer hover:bg-accent/20"
+                    >
+                      <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
+                        <HugeiconsIcon icon={Image01Icon} size={13} className="text-primary" strokeWidth={1.6} />
+                      </div>
+                      <span className="text-[12.5px] font-medium text-foreground/80">
+                        Elegir de galería
+                      </span>
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
             <input
-              ref={fileInputRef}
+              ref={cameraInputRef}
               type="file"
               accept="image/*"
               capture="environment"
+              onChange={handleFilePick}
+              className="hidden"
+            />
+            <input
+              ref={galleryInputRef}
+              type="file"
+              accept="image/*"
               onChange={handleFilePick}
               className="hidden"
             />

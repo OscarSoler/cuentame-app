@@ -11,6 +11,7 @@ import {
 import { ChatSuggestions } from "./chat-suggestions";
 import { ChatMessages } from "./chat-messages";
 import { ChatInput } from "./chat-input";
+import { ChatQuickPills } from "./chat-quick-pills";
 import { ChatSkeleton } from "./chat-skeleton";
 
 interface ChatContentProps {
@@ -128,7 +129,16 @@ function ChatContentReady({
   return (
     <div className="flex flex-col w-full h-full">
       {hasMessages ? (
-        <ChatMessages messages={messages} isLoading={isLoading} />
+        <>
+          <ChatMessages messages={messages} isLoading={isLoading} />
+          <ChatQuickPills
+            ledgerType={ledgerType}
+            isLoading={isLoading}
+            onSelect={(prompt) => {
+              if (!isLoading) sendMessage({ text: prompt });
+            }}
+          />
+        </>
       ) : (
         <ChatSuggestions
           isDrawer={isDrawer}
