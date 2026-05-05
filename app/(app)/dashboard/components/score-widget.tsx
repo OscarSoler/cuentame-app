@@ -1,27 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { FireIcon, Award01Icon } from "@hugeicons/core-free-icons";
 import type { LedgerType } from "@/lib/context/ledger-context";
-
-const levels = [
-  { min: 0,    personal: "Semilla",          business: "Emprendedor" },
-  { min: 200,  personal: "Brote",            business: "Negocio en marcha" },
-  { min: 500,  personal: "Planta",           business: "Operación estable" },
-  { min: 1000, personal: "Árbol",            business: "Negocio sólido" },
-  { min: 2500, personal: "Bosque",           business: "Empresa consciente" },
-];
-
-function getLevel(score: number, type: LedgerType) {
-  const level = [...levels].reverse().find((l) => score >= l.min) ?? levels[0];
-  const index = levels.indexOf(level);
-  const next = levels[index + 1];
-  const label = type === "business" ? level.business : level.personal;
-  const progress = next
-    ? Math.round(((score - level.min) / (next.min - level.min)) * 100)
-    : 100;
-  return { label, index, progress, nextMin: next?.min ?? null };
-}
+import { getLevel } from "@/core/transaction/domain/scoring";
 
 interface ScoreWidgetProps {
   ledgerType: LedgerType;
@@ -41,7 +24,11 @@ export function ScoreWidget({
   const weekDays = ["L", "M", "X", "J", "V", "S", "D"];
 
   return (
-    <div className="bg-white rounded-xl px-3.5 py-2.5 flex items-center gap-3 shadow-sm">
+    <Link
+      href="/points"
+      className="bg-white rounded-xl px-3.5 py-2.5 flex items-center gap-3 shadow-sm transition-colors hover:bg-white/80 active:bg-accent/30"
+      aria-label="Ver cómo ganas puntos"
+    >
       {/* Score */}
       <div className="flex items-center gap-1.5 shrink-0">
         <HugeiconsIcon icon={Award01Icon} size={13} className="text-primary" strokeWidth={1.5} />
@@ -68,7 +55,12 @@ export function ScoreWidget({
       {/* Streak */}
       <div className="flex items-center gap-1 bg-orange-50 rounded-full px-2 py-0.5 shrink-0">
         <HugeiconsIcon icon={FireIcon} size={11} className="text-orange-400" strokeWidth={1.5} />
-        <span className="text-[11px] font-semibold text-orange-500">{streak}</span>
+        <span className="text-[11px] font-semibold text-orange-500 leading-none">
+          {streak}
+          <span className="ml-0.5 text-[9px] font-medium text-orange-400/80">
+            {streak === 1 ? "día" : "días"}
+          </span>
+        </span>
       </div>
 
       {/* Week dots */}
@@ -86,6 +78,6 @@ export function ScoreWidget({
           </div>
         ))}
       </div>
-    </div>
+    </Link>
   );
 }

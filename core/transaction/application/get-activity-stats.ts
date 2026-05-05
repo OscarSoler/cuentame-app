@@ -1,13 +1,12 @@
 import { ActivityStats } from "../domain/streak.entity";
 import { TransactionRepository } from "../domain/transaction.repository";
+import { POINTS_PER_TRANSACTION, POINTS_PER_STREAK_DAY } from "../domain/scoring";
 import { localDateISO } from "@/lib/utils";
 
 interface GetActivityStatsConfig {
   repository: TransactionRepository;
 }
 
-const POINTS_PER_TRANSACTION = 10;
-const POINTS_PER_STREAK_DAY = 5;
 const LOOKBACK_DAYS = 90;
 
 export class GetActivityStats {
