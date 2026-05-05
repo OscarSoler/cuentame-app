@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useTransition } from "react";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { CheckmarkCircle02Icon } from "@hugeicons/core-free-icons";
 import { formatCurrency } from "@/lib/utils";
@@ -22,36 +22,40 @@ const EMOTIONS: { value: TransactionEmotion; emoji: string; label: string }[] = 
 
 interface ExpenseCardProps {
   id?: string;
+  toolCallId?: string;
   amount: number;
   category: string;
   note: string;
   pillar: Pillar;
   date: string;
   emotion?: TransactionEmotion | null;
+  onEdited?: (toolCallId: string, patch: Record<string, unknown>) => void;
+  onDeleted?: (toolCallId: string) => void;
 }
 
 export function ExpenseCard({
   id,
+  toolCallId,
   amount,
   category,
   note,
   pillar,
   date,
-  emotion: initialEmotion = null,
+  emotion = null,
+  onEdited,
+  onDeleted,
 }: ExpenseCardProps) {
   const config = PILLAR_META[pillar];
-  const [emotion, setEmotion] = useState<TransactionEmotion | null>(initialEmotion);
   const [, startTransition] = useTransition();
 
   const handleEmotionSelect = (next: TransactionEmotion) => {
     if (!id || next === emotion) return;
-    const prev = emotion;
-    setEmotion(next);
+    if (toolCallId && onEdited) onEdited(toolCallId, { emotion: next });
     startTransition(async () => {
       const result = await updateTransactionEmotionAction(id, next);
       if (!result.success) {
         console.error("[ExpenseCard] emotion update failed:", result.error);
-        setEmotion(prev);
+        if (toolCallId && onEdited) onEdited(toolCallId, { emotion });
       }
     });
   };
@@ -59,6 +63,14 @@ export function ExpenseCard({
   return (
     <ExpenseDetailDrawer
       expense={{ id, amount, category, note, pillar, date, emotion }}
+      onEdited={
+        toolCallId && onEdited
+          ? (patch) => onEdited(toolCallId, patch)
+          : undefined
+      }
+      onDeleted={
+        toolCallId && onDeleted ? () => onDeleted(toolCallId) : undefined
+      }
     >
       <div
         role="button"

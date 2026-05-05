@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import {
   Drawer,
   DrawerContent,
@@ -42,12 +42,18 @@ interface IncomeData {
 interface IncomeDetailDrawerProps {
   income: IncomeData;
   children: React.ReactNode;
+  onEdited?: (patch: {
+    amount: number;
+    category: string;
+    note: string;
+  }) => void;
   onDeleted?: () => void;
 }
 
 export function IncomeDetailDrawer({
   income,
   children,
+  onEdited,
   onDeleted,
 }: IncomeDetailDrawerProps) {
   const [open, setOpen] = useState(false);
@@ -56,6 +62,14 @@ export function IncomeDetailDrawer({
   const [note, setNote] = useState(income.note);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  useEffect(() => {
+    if (!open) return;
+    setAmount(income.amount.toString());
+    setCategory(income.category);
+    setNote(income.note);
+    setError(null);
+  }, [open, income.amount, income.category, income.note]);
 
   const handleSave = () => {
     if (!income.id) {
@@ -68,16 +82,23 @@ export function IncomeDetailDrawer({
       return;
     }
     setError(null);
+    const trimmedCategory = category.trim();
+    const trimmedNote = note.trim();
     startTransition(async () => {
       const result = await updateTransactionAction(income.id!, {
         amount: parsedAmount,
-        category: category.trim() || null,
-        note: note.trim() || null,
+        category: trimmedCategory || null,
+        note: trimmedNote || null,
       });
       if (!result.success) {
         setError(result.error);
         return;
       }
+      onEdited?.({
+        amount: parsedAmount,
+        category: trimmedCategory,
+        note: trimmedNote,
+      });
       setOpen(false);
     });
   };

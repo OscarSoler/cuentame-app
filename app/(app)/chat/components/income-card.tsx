@@ -14,20 +14,26 @@ const categoryLabels: Record<string, string> = {
 
 interface IncomeCardProps {
   id?: string;
+  toolCallId?: string;
   amount: number;
   category: string;
   note: string;
   date: string;
   ivaAmount: number;
+  onEdited?: (toolCallId: string, patch: Record<string, unknown>) => void;
+  onDeleted?: (toolCallId: string) => void;
 }
 
 export function IncomeCard({
   id,
+  toolCallId,
   amount,
   category,
   note,
   date,
   ivaAmount,
+  onEdited,
+  onDeleted,
 }: IncomeCardProps) {
   const { activeLedger } = useLedger();
   const showIva = activeLedger.type === "business" && ivaAmount > 0;
@@ -41,6 +47,14 @@ export function IncomeCard({
         date,
         ivaAmount: showIva ? ivaAmount : 0,
       }}
+      onEdited={
+        toolCallId && onEdited
+          ? (patch) => onEdited(toolCallId, patch)
+          : undefined
+      }
+      onDeleted={
+        toolCallId && onDeleted ? () => onDeleted(toolCallId) : undefined
+      }
     >
       <div
         role="button"

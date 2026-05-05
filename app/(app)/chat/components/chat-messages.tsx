@@ -9,6 +9,11 @@ import { IncomeCard } from "./income-card";
 interface ChatMessagesProps {
   messages: UIMessage[];
   isLoading: boolean;
+  onTransactionEdited?: (
+    toolCallId: string,
+    patch: Record<string, unknown>,
+  ) => void;
+  onTransactionDeleted?: (toolCallId: string) => void;
 }
 
 function AssistantAvatar() {
@@ -34,7 +39,12 @@ function ToolError({ error }: { error: string }) {
   );
 }
 
-export function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
+export function ChatMessages({
+  messages,
+  isLoading,
+  onTransactionEdited,
+  onTransactionDeleted,
+}: ChatMessagesProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -51,6 +61,7 @@ export function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
       return (
         <ExpenseCard
           key={part.toolCallId}
+          toolCallId={part.toolCallId}
           id={id}
           amount={amount}
           category={category}
@@ -58,6 +69,8 @@ export function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
           pillar={pillar}
           date={date}
           emotion={emotion ?? null}
+          onEdited={onTransactionEdited}
+          onDeleted={onTransactionDeleted}
         />
       );
     }
@@ -66,7 +79,20 @@ export function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
         return <ToolError key={part.toolCallId} error={part.output.error} />;
       }
       const { id, amount, category, note, date, ivaAmount } = part.output;
-      return <IncomeCard key={part.toolCallId} id={id} amount={amount} category={category} note={note} date={date} ivaAmount={ivaAmount} />;
+      return (
+        <IncomeCard
+          key={part.toolCallId}
+          toolCallId={part.toolCallId}
+          id={id}
+          amount={amount}
+          category={category}
+          note={note}
+          date={date}
+          ivaAmount={ivaAmount}
+          onEdited={onTransactionEdited}
+          onDeleted={onTransactionDeleted}
+        />
+      );;
     }
     if ((part.type === "tool-registerExpense" || part.type === "tool-registerIncome") && part.state === "input-available") {
       return (

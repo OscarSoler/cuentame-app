@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import {
   Drawer,
   DrawerContent,
@@ -50,12 +50,20 @@ interface ExpenseData {
 interface ExpenseDetailDrawerProps {
   expense: ExpenseData;
   children: React.ReactNode;
+  onEdited?: (patch: {
+    amount: number;
+    category: string;
+    note: string;
+    pillar: Pillar;
+    emotion: TransactionEmotion | null;
+  }) => void;
   onDeleted?: () => void;
 }
 
 export function ExpenseDetailDrawer({
   expense,
   children,
+  onEdited,
   onDeleted,
 }: ExpenseDetailDrawerProps) {
   const { activeLedger } = useLedger();
@@ -69,6 +77,23 @@ export function ExpenseDetailDrawer({
   );
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  useEffect(() => {
+    if (!open) return;
+    setAmount(expense.amount.toString());
+    setCategory(expense.category);
+    setNote(expense.note);
+    setPillar(expense.pillar);
+    setEmotion(expense.emotion ?? "");
+    setError(null);
+  }, [
+    open,
+    expense.amount,
+    expense.category,
+    expense.note,
+    expense.pillar,
+    expense.emotion,
+  ]);
 
   const pillarKeys =
     activeLedger.type === "business" ? businessPillarKeys : personalPillarKeys;
@@ -84,18 +109,28 @@ export function ExpenseDetailDrawer({
       return;
     }
     setError(null);
+    const trimmedCategory = category.trim();
+    const trimmedNote = note.trim();
+    const nextEmotion: TransactionEmotion | null = emotion === "" ? null : emotion;
     startTransition(async () => {
       const result = await updateTransactionAction(expense.id!, {
         amount: parsedAmount,
-        category: category.trim() || null,
-        note: note.trim() || null,
+        category: trimmedCategory || null,
+        note: trimmedNote || null,
         pillar,
-        emotion: emotion === "" ? null : emotion,
+        emotion: nextEmotion,
       });
       if (!result.success) {
         setError(result.error);
         return;
       }
+      onEdited?.({
+        amount: parsedAmount,
+        category: trimmedCategory,
+        note: trimmedNote,
+        pillar,
+        emotion: nextEmotion,
+      });
       setOpen(false);
     });
   };
