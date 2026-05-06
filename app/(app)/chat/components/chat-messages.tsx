@@ -3,6 +3,7 @@
 import { useRef, useEffect } from "react";
 import Image from "next/image";
 import type { UIMessage } from "ai";
+import { Streamdown } from "streamdown";
 import { ExpenseCard } from "./expense-card";
 import { IncomeCard } from "./income-card";
 
@@ -172,9 +173,9 @@ export function ChatMessages({
                   return (
                     <div
                       key={`${message.id}-${i}`}
-                      className="rounded-2xl rounded-tl-md px-4 py-2.5 text-[14px] leading-relaxed bg-cream/80 backdrop-blur-sm text-foreground border border-border/40 shadow-[0_1px_3px_rgba(45,80,22,0.04)]"
+                      className="rounded-2xl rounded-tl-md px-4 py-2.5 text-[14px] leading-relaxed bg-cream/80 backdrop-blur-sm text-foreground border border-border/40 shadow-[0_1px_3px_rgba(45,80,22,0.04)] prose prose-sm max-w-none break-words [&>*:first-child]:mt-0 [&>*:last-child]:mb-0"
                     >
-                      <p className="whitespace-pre-wrap break-words">{part.text}</p>
+                      <Streamdown>{part.text}</Streamdown>
                     </div>
                   );
                 }

@@ -46,8 +46,13 @@ export async function POST(req: Request) {
     const [, conversation] = await Promise.all([
       assertLedgerOwnership(session.user.id, ledgerId),
       requestedConversationId
-        ? conversationRepo.getByIdForUser(requestedConversationId, session.user.id)
-        : new GetOrCreateLatest({ repository: conversationRepo }).execute(ledgerId),
+        ? conversationRepo.getByIdForUser(
+            requestedConversationId,
+            session.user.id,
+          )
+        : new GetOrCreateLatest({ repository: conversationRepo }).execute(
+            ledgerId,
+          ),
     ]);
 
     if (!conversation) {
@@ -61,8 +66,9 @@ export async function POST(req: Request) {
   }
 
   const tools = buildChatTools({ ledgerId, ledgerType });
-  const previous = await new GetConversation({ repository: conversationRepo })
-    .byIdWithMessages(conversationId);
+  const previous = await new GetConversation({
+    repository: conversationRepo,
+  }).byIdWithMessages(conversationId);
   const previousMessages = (previous?.messages ?? []).map(
     (m) => ({ id: m.id, role: m.role, parts: m.parts }) as UIMessage,
   );
@@ -73,13 +79,11 @@ export async function POST(req: Request) {
   });
 
   const hasImage = messages.some((m) =>
-    m.parts.some(
-      (p) => p.type === "file" && p.mediaType?.startsWith("image/"),
-    ),
+    m.parts.some((p) => p.type === "file" && p.mediaType?.startsWith("image/")),
   );
 
   const result = streamText({
-    model: openai(hasImage ? "gpt-4o-mini" : "gpt-4.1-nano"),
+    model: openai(hasImage ? "gpt-4o-mini" : "gpt-5.4-nano"),
     system: getSystemPrompt(ledgerType),
     messages: await convertToModelMessages(messages),
     tools,
