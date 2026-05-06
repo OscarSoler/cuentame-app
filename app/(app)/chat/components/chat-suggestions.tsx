@@ -51,19 +51,6 @@ export function ChatSuggestions({
         isDrawer ? "px-5 pt-5 pb-4" : "px-6 pt-8 pb-6"
       }`}
     >
-      {!isDrawer && (
-        <>
-          <span
-            aria-hidden
-            className="pointer-events-none absolute -top-32 -right-24 w-72 h-72 rounded-full bg-accent/40 blur-[80px] opacity-70"
-          />
-          <span
-            aria-hidden
-            className="pointer-events-none absolute -bottom-40 -left-20 w-80 h-80 rounded-full bg-[#D4A574]/15 blur-[90px]"
-          />
-        </>
-      )}
-
       <header
         className={`relative flex items-start justify-between gap-4 ${
           isDrawer ? "mb-5" : "mb-7"

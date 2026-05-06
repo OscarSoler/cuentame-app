@@ -3,9 +3,8 @@ import {
   PiggyBankIcon,
   BulbIcon,
   ShoppingCart01Icon,
-  Coins01Icon,
-  Calculator01Icon,
   MoneyAdd01Icon,
+  BookOpen01Icon,
 } from "@hugeicons/core-free-icons";
 import type { LedgerType } from "@/lib/context/ledger-context";
 
@@ -55,6 +54,17 @@ const personalActions: QuickAction[] = [
     accentRing: "bg-[#C8A06C]/20",
     span: "full",
   },
+  {
+    id: "personal-kakebo",
+    icon: BookOpen01Icon,
+    title: "¿Qué es Kakebo?",
+    hint: "El método japonés del ahorro",
+    prompt: "¿Qué es el método Kakebo y cómo funciona?",
+    gradient: "from-[#E8EFDD] to-[#D4E4C8]",
+    iconColor: "text-[#2D5016]",
+    accentRing: "bg-[#8B9E7C]/25",
+    span: "half",
+  },
 ];
 
 const businessActions: QuickAction[] = [
@@ -81,26 +91,15 @@ const businessActions: QuickAction[] = [
     span: "half",
   },
   {
-    id: "business-cashflow",
-    icon: Coins01Icon,
-    title: "Flujo de caja",
-    hint: "Cómo va tu día",
-    prompt: "¿Cómo va mi flujo de caja hoy?",
+    id: "business-kakebo",
+    icon: BookOpen01Icon,
+    title: "¿Qué es Kakebo?",
+    hint: "El método aplicado a tu negocio",
+    prompt: "¿Qué es el método Kakebo y cómo lo aplico a mi negocio?",
     gradient: "from-[#E8EFDD] to-[#D4E4C8]",
     iconColor: "text-[#2D5016]",
     accentRing: "bg-[#8B9E7C]/25",
     span: "half",
-  },
-  {
-    id: "business-iva",
-    icon: Calculator01Icon,
-    title: "IVA del mes",
-    hint: "Cuánto llevas acumulado",
-    prompt: "¿Cuánto IVA llevo este mes?",
-    gradient: "from-[#EFE5D2] to-[#DCCBA8]",
-    iconColor: "text-[#7A5C3A]",
-    accentRing: "bg-[#C8A06C]/20",
-    span: "full",
   },
 ];
 
