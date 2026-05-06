@@ -10,6 +10,7 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react";
 import { SmartPhone01Icon } from "@hugeicons/core-free-icons";
 import { sendPhoneOtpAction } from "@/core/auth/presentation/auth.actions";
+import { validateColombianMobile } from "@/lib/phone";
 
 export type VerifyResult =
   | { success: true; hasLedgers?: boolean }
@@ -35,20 +36,19 @@ export function PhoneAuthForm({ onVerify, onSuccess }: PhoneAuthFormProps) {
   const handleSendOtp = async () => {
     if (loading) return;
     setError("");
-    const digitsOnly = phone.replace(/\D/g, "");
-    if (digitsOnly.length < 7) {
-      setError("Ingresa un número válido con código de país");
+    const validation = validateColombianMobile(`+57${phone.replace(/\D/g, "")}`);
+    if (!validation.valid) {
+      setError(validation.error);
       return;
     }
-    const normalized = `+${digitsOnly}`;
     setLoading(true);
-    const result = await sendPhoneOtpAction(normalized);
+    const result = await sendPhoneOtpAction(validation.e164);
     setLoading(false);
     if (!result.success) {
       setError(result.error);
       return;
     }
-    setPhone(normalized);
+    setPhone(validation.e164);
     setSubStep("otp");
   };
 
@@ -129,7 +129,12 @@ export function PhoneAuthForm({ onVerify, onSuccess }: PhoneAuthFormProps) {
         <Button
           variant="ghost"
           className="w-full max-w-65"
-          onClick={() => { setSubStep("phone"); setOtp(""); setError(""); }}
+          onClick={() => {
+            setSubStep("phone");
+            setOtp("");
+            setError("");
+            setPhone(phone.replace(/^\+57/, ""));
+          }}
         >
           Cambiar número
         </Button>
@@ -157,20 +162,30 @@ export function PhoneAuthForm({ onVerify, onSuccess }: PhoneAuthFormProps) {
           </p>
         </div>
 
-        <input
-          type="tel"
-          inputMode="tel"
-          placeholder="+57 300 123 4567"
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          autoFocus
-          className="w-full max-w-72 text-center text-3xl font-light tracking-wide bg-transparent border-b-2 border-border focus:border-primary focus:outline-none py-3 text-foreground placeholder:text-muted-foreground/40 transition-colors"
-        />
+        <div className="w-full max-w-72 flex items-center justify-center gap-2 border-b-2 border-border focus-within:border-primary py-3 transition-colors">
+          <span className="text-3xl font-light tracking-wide text-muted-foreground select-none">
+            +57
+          </span>
+          <input
+            type="tel"
+            inputMode="numeric"
+            autoComplete="tel-national"
+            placeholder="300 123 4567"
+            value={phone}
+            onChange={(e) => {
+              const digits = e.target.value.replace(/\D/g, "").slice(0, 10);
+              setPhone(digits);
+            }}
+            maxLength={10}
+            autoFocus
+            className="flex-1 min-w-0 text-center text-3xl font-light tracking-wide bg-transparent focus:outline-none text-foreground placeholder:text-muted-foreground/40"
+          />
+        </div>
 
         {error && <p className="text-sm text-destructive">{error}</p>}
       </form>
 
-      <Button onClick={handleSendOtp} disabled={loading || !phone.trim()} className="w-full">
+      <Button onClick={handleSendOtp} disabled={loading || phone.length !== 10} className="w-full">
         {loading ? "Enviando..." : "Continuar"}
       </Button>
     </div>

@@ -5,11 +5,17 @@ import { redirect } from "next/navigation";
 import { auth } from "@/app/lib/auth";
 import { DrizzleLedgerRepository } from "@/core/ledger/infrastructure/drizzle-ledger.repository";
 import { GetLedger } from "@/core/ledger/application/get-ledger";
+import { validateColombianMobile } from "@/lib/phone";
 
 export async function sendPhoneOtpAction(phoneNumber: string) {
+  const validation = validateColombianMobile(phoneNumber);
+  if (!validation.valid) {
+    return { success: false as const, error: validation.error };
+  }
+
   try {
     await auth.api.sendPhoneNumberOTP({
-      body: { phoneNumber },
+      body: { phoneNumber: validation.e164 },
       headers: await headers(),
     });
     return { success: true as const };
@@ -22,10 +28,15 @@ export async function sendPhoneOtpAction(phoneNumber: string) {
 }
 
 export async function loginPhoneAction(input: { phoneNumber: string; code: string }) {
+  const validation = validateColombianMobile(input.phoneNumber);
+  if (!validation.valid) {
+    return { success: false as const, error: validation.error };
+  }
+
   let userId: string;
   try {
     const result = await auth.api.verifyPhoneNumber({
-      body: { phoneNumber: input.phoneNumber, code: input.code },
+      body: { phoneNumber: validation.e164, code: input.code },
       headers: await headers(),
     });
     console.log("[loginPhoneAction] verify result:", JSON.stringify(result));
@@ -45,7 +56,7 @@ export async function loginPhoneAction(input: { phoneNumber: string; code: strin
     repository: new DrizzleLedgerRepository(),
   }).byUserId(userId);
 
-  redirect(ledgers.length > 0 ? "/dashboard" : "/");
+  redirect(ledgers.length > 0 ? "/dashboard" : "/setup/ledger");
 }
 
 export async function signupPhoneAction(input: {
@@ -53,11 +64,16 @@ export async function signupPhoneAction(input: {
   code: string;
   name?: string;
 }) {
+  const validation = validateColombianMobile(input.phoneNumber);
+  if (!validation.valid) {
+    return { success: false as const, error: validation.error };
+  }
+
   let userId: string;
   let userName: string;
   try {
     const result = await auth.api.verifyPhoneNumber({
-      body: { phoneNumber: input.phoneNumber, code: input.code },
+      body: { phoneNumber: validation.e164, code: input.code },
       headers: await headers(),
     });
     if (!result?.user?.id) {
@@ -73,7 +89,7 @@ export async function signupPhoneAction(input: {
   }
 
   const trimmed = input.name?.trim();
-  const isFreshUser = userName === input.phoneNumber;
+  const isFreshUser = userName === validation.e164;
   if (trimmed && isFreshUser) {
     try {
       await auth.api.updateUser({

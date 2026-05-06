@@ -70,8 +70,8 @@ export const test = base.extend<Fixtures>({
           await page.getByRole("button", { name: "Continuar" }).click();
         }
 
-        // Step 5: Phone
-        await page.getByPlaceholder(/\+57/).fill(phoneNumber);
+        // Step 5: Phone — el form prefija +57, sólo escribimos los 10 dígitos nacionales.
+        await page.locator('input[type="tel"]').fill(phoneNumber.replace(/^\+57/, ""));
         await page.getByRole("button", { name: "Continuar" }).click();
 
         // OTP
@@ -94,7 +94,7 @@ export const test = base.extend<Fixtures>({
 
       async loginExisting(phoneNumber) {
         await page.goto("/login");
-        await page.getByPlaceholder(/\+57/).fill(phoneNumber);
+        await page.locator('input[type="tel"]').fill(phoneNumber.replace(/^\+57/, ""));
         await page.getByRole("button", { name: "Continuar" }).click();
         const code = await readOtp(phoneNumber);
         await fillOtp(page, code);
