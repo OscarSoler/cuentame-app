@@ -20,8 +20,3 @@ export interface BusinessSetupStepProps extends StepProps {
   businessType: string;
   onBusinessTypeChange: (type: string) => void;
 }
-
-export interface ReadyStepProps {
-  name: string;
-  onStart: () => void;
-}

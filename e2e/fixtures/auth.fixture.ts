@@ -78,8 +78,7 @@ export const test = base.extend<Fixtures>({
         const code = await readOtp(phoneNumber);
         await fillOtp(page, code);
 
-        // Step 6: Ready → /setup → /chat
-        await page.getByRole("button", { name: "Comenzar" }).click();
+        // Tras OTP, signup va directo a /setup → /chat (sin pantalla intermedia).
         await page.waitForURL("**/chat", { timeout: 15_000 });
 
         const [user] = await testDb

@@ -1,28 +1,33 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { PhoneAuthForm } from "@/components/auth/phone-auth-form";
 import { signupPhoneAction } from "@/core/auth/presentation/auth.actions";
+import type { LedgerKind } from "./types";
 
 interface SignupPhoneStepProps {
   name: string;
-  onNeedsSetup: () => Promise<void> | void;
+  ledgerTypes: LedgerKind[];
+  businessName: string;
+  businessType: string;
 }
 
-export function SignupPhoneStep({ name, onNeedsSetup }: SignupPhoneStepProps) {
-  const router = useRouter();
-
+export function SignupPhoneStep({
+  name,
+  ledgerTypes,
+  businessName,
+  businessType,
+}: SignupPhoneStepProps) {
   return (
     <PhoneAuthForm
       onVerify={async (phoneNumber, code) => {
-        return await signupPhoneAction({ phoneNumber, code, name });
-      }}
-      onSuccess={async ({ hasLedgers }) => {
-        if (hasLedgers) {
-          router.replace("/dashboard");
-          return;
-        }
-        await onNeedsSetup();
+        return await signupPhoneAction({
+          phoneNumber,
+          code,
+          name,
+          ledgerTypes,
+          businessName,
+          businessType,
+        });
       }}
     />
   );

@@ -2,7 +2,6 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import {
   ArrowRight01Icon,
   Leaf02Icon,
-  SparklesIcon,
 } from "@hugeicons/core-free-icons";
 import { getQuickActions, type QuickAction } from "./quick-actions";
 
@@ -157,117 +156,52 @@ function HeroCard({ action, isDrawer, onSelect }: HeroCardProps) {
     <button
       type="button"
       onClick={() => onSelect(action.prompt)}
-      className="group relative w-full overflow-hidden rounded-[28px] text-left cursor-pointer transition-all duration-500 ease-out hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.995] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-      style={{
-        background:
-          "linear-gradient(135deg, #1F3A0F 0%, #2D5016 35%, #3A5D1F 70%, #4A6B28 100%)",
-        boxShadow:
-          "0 1px 0 0 rgba(255,255,255,0.08) inset, 0 24px 48px -16px rgba(31,58,15,0.5), 0 4px 12px -4px rgba(31,58,15,0.3)",
-      }}
+      className={`group relative w-full text-left overflow-hidden rounded-2xl bg-cream/70 ring-1 ring-primary/15 transition-all hover:ring-primary/30 hover:-translate-y-px focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${
+        isDrawer ? "px-4 py-4" : "px-5 py-5"
+      }`}
     >
       <span
         aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-[0.07] mix-blend-soft-light"
-        style={{
-          backgroundImage:
-            "radial-gradient(circle at 1px 1px, white 0.6px, transparent 0)",
-          backgroundSize: "10px 10px",
-        }}
-      />
-
-      <span
-        aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-[0.18]"
-        style={{
-          backgroundImage:
-            "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.4 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E\")",
-        }}
-      />
-
-      <span
-        aria-hidden
-        className="pointer-events-none absolute -right-20 -top-20 w-72 h-72 rounded-full bg-[#D4A574]/20 blur-3xl transition-all duration-700 group-hover:bg-[#D4A574]/30 group-hover:scale-110"
+        className="pointer-events-none absolute left-0 top-0 bottom-0 w-[3px] bg-primary/70 rounded-r-full"
       />
       <span
         aria-hidden
-        className="pointer-events-none absolute -left-12 -bottom-16 w-56 h-56 rounded-full bg-[#8B9E7C]/15 blur-3xl"
+        className="pointer-events-none absolute -right-10 -top-10 w-32 h-32 rounded-full bg-accent/40 blur-2xl opacity-60"
       />
 
-      <span
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent"
-      />
-
-      <div
-        className={`relative flex flex-col ${
-          isDrawer
-            ? "px-5 pt-5 pb-4 min-h-[140px]"
-            : "px-7 pt-6 pb-5 min-h-[172px]"
-        }`}
-      >
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <span
-              aria-hidden
-              className="relative flex h-1.5 w-1.5"
-            >
-              <span className="absolute inline-flex h-full w-full rounded-full bg-[#D4A574] opacity-60 animate-ping" />
-              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-[#D4A574]" />
-            </span>
-            <span className="text-[9.5px] uppercase tracking-[0.28em] text-[#D4A574] font-semibold">
-              Empieza aquí
-            </span>
-          </div>
-
-          <div className="shrink-0 flex items-center justify-center w-10 h-10 rounded-2xl bg-white/8 ring-1 ring-white/15 backdrop-blur-sm transition-all duration-500 group-hover:bg-white/15 group-hover:ring-white/30 group-hover:rotate-[-4deg]">
-            <HugeiconsIcon
-              icon={action.icon}
-              size={18}
-              className="text-white"
-              strokeWidth={1.7}
-            />
-          </div>
+      <div className="relative flex items-start gap-3">
+        <div className="shrink-0 w-10 h-10 rounded-xl bg-primary/10 ring-1 ring-primary/20 flex items-center justify-center">
+          <HugeiconsIcon
+            icon={action.icon}
+            size={17}
+            className="text-primary"
+            strokeWidth={1.75}
+          />
         </div>
 
-        <h3
-          className={`font-heading text-white tracking-[-0.025em] mt-auto pt-6 ${
-            isDrawer
-              ? "text-[26px] leading-[1.0]"
-              : "text-[36px] leading-[0.98]"
-          }`}
-        >
-          {action.title}
-          <span className="text-[#D4A574]">.</span>
-        </h3>
-
-        <div
-          className={`flex items-end justify-between gap-3 ${
-            isDrawer ? "mt-2.5" : "mt-3"
-          }`}
-        >
-          <p
-            className={`text-white/65 leading-snug ${
-              isDrawer ? "text-[12px] max-w-[14rem]" : "text-[13px] max-w-[16rem]"
+        <div className="flex-1 min-w-0">
+          <span className="text-[10px] uppercase tracking-[0.22em] text-primary/70 font-semibold">
+            Empieza aquí
+          </span>
+          <h3
+            className={`font-heading text-foreground tracking-[-0.01em] mt-1 ${
+              isDrawer ? "text-[19px] leading-tight" : "text-[22px] leading-tight"
             }`}
           >
+            {action.title}
+            <span className="text-primary">.</span>
+          </h3>
+          <p className="text-[12px] text-muted-foreground/75 mt-1 leading-snug">
             {action.hint}
           </p>
-
-          <span className="shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-white/10 ring-1 ring-white/15 text-[10.5px] font-medium text-white tracking-wide backdrop-blur-sm transition-all duration-300 group-hover:bg-[#D4A574] group-hover:ring-[#D4A574] group-hover:text-[#1F3A0F]">
-            <HugeiconsIcon
-              icon={SparklesIcon}
-              size={11}
-              strokeWidth={2}
-              className="transition-transform duration-500 group-hover:rotate-12"
-            />
-            <HugeiconsIcon
-              icon={ArrowRight01Icon}
-              size={11}
-              strokeWidth={2.2}
-              className="transition-transform duration-300 group-hover:translate-x-0.5"
-            />
-          </span>
         </div>
+
+        <HugeiconsIcon
+          icon={ArrowRight01Icon}
+          size={14}
+          className="shrink-0 mt-1 text-primary/50 transition-all group-hover:text-primary group-hover:translate-x-0.5"
+          strokeWidth={2}
+        />
       </div>
     </button>
   );

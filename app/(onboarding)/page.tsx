@@ -10,7 +10,6 @@ import { NameStep } from "./components/name-step";
 import { LedgerTypeStep } from "./components/ledger-type-step";
 import { BusinessSetupStep } from "./components/business-setup-step";
 import { SignupPhoneStep } from "./components/signup-phone-step";
-import { ReadyStep } from "./components/ready-step";
 import type { LedgerKind } from "./components/types";
 
 export default function OnboardingPage() {
@@ -22,7 +21,7 @@ export default function OnboardingPage() {
   const [businessType, setBusinessType] = useState("");
 
   const hasBusiness = ledgerTypes.includes("business");
-  const totalSteps = hasBusiness ? 7 : 6;
+  const totalSteps = hasBusiness ? 6 : 5;
 
   const toggleLedgerType = (type: LedgerKind) => {
     setLedgerTypes((prev) =>
@@ -32,21 +31,7 @@ export default function OnboardingPage() {
 
   const handleLedgerNext = () => setStep(hasBusiness ? 4 : 5);
 
-  const handlePhoneAuthSuccess = async () => {
-    const types = ledgerTypes.length > 0 ? ledgerTypes : ["personal" as const];
-    sessionStorage.setItem(
-      "onboarding",
-      JSON.stringify({
-        name,
-        types,
-        businessName,
-        businessType,
-      }),
-    );
-    setStep(6);
-  };
-
-  const showLoginShortcut = step > 0 && step < 6;
+  const showLoginShortcut = step > 0 && step < totalSteps - 1;
 
   return (
     <div className="flex flex-col h-dvh w-full bg-transparent ">
@@ -102,9 +87,13 @@ export default function OnboardingPage() {
           onBusinessTypeChange={setBusinessType}
         />
       )}
-      {step === 5 && <SignupPhoneStep name={name} onNeedsSetup={handlePhoneAuthSuccess} />}
-      {step === 6 && (
-        <ReadyStep name={name} onStart={() => router.push("/setup")} />
+      {step === 5 && (
+        <SignupPhoneStep
+          name={name}
+          ledgerTypes={ledgerTypes}
+          businessName={businessName}
+          businessType={businessType}
+        />
       )}
     </div>
   );
