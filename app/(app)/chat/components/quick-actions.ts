@@ -2,10 +2,10 @@ import type { IconSvgElement } from "@hugeicons/react";
 import {
   PiggyBankIcon,
   BulbIcon,
-  ChartLineData01Icon,
   ShoppingCart01Icon,
   Coins01Icon,
   Calculator01Icon,
+  MoneyAdd01Icon,
 } from "@hugeicons/core-free-icons";
 import type { LedgerType } from "@/lib/context/ledger-context";
 
@@ -45,11 +45,11 @@ const personalActions: QuickAction[] = [
     span: "half",
   },
   {
-    id: "personal-summary",
-    icon: ChartLineData01Icon,
-    title: "Resumen del mes",
-    hint: "En qué se fue tu plata",
-    prompt: "Hazme un resumen de mis gastos este mes",
+    id: "personal-income",
+    icon: MoneyAdd01Icon,
+    title: "Recibí un ingreso",
+    hint: "Anota un sueldo, pago o regalo",
+    prompt: "Quiero registrar un ingreso que acabo de recibir",
     gradient: "from-[#EFE5D2] to-[#DCCBA8]",
     iconColor: "text-[#7A5C3A]",
     accentRing: "bg-[#C8A06C]/20",

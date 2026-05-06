@@ -106,7 +106,7 @@ export function PhilosophyStep({ onNext }: StepProps) {
         </div>
       </div>
 
-      <Button onClick={onNext} className="w-full h-12 text-base">
+      <Button onClick={onNext} className="w-full">
         Continuar
       </Button>
     </div>
