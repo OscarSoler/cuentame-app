@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
+import { OnboardingShell } from "./components/onboarding-shell";
 import { WelcomeStep } from "./components/welcome-step";
 import { PhilosophyStep } from "./components/philosophy-step";
 import { NameStep } from "./components/name-step";
@@ -34,67 +35,69 @@ export default function OnboardingPage() {
   const showLoginShortcut = step > 0 && step < totalSteps - 1;
 
   return (
-    <div className="flex flex-col h-dvh w-full bg-transparent ">
-      <div className="relative flex justify-center items-center gap-2 pt-5 px-6">
-        <div className="flex gap-2">
-          {Array.from({ length: totalSteps }, (_, i) => (
-            <div
-              key={i}
-              className={`h-1 rounded-full transition-all duration-300 ${
-                i === step
-                  ? "w-5 bg-primary"
-                  : i < step
-                    ? "w-1.5 bg-primary/30"
-                    : "w-1.5 bg-border/60"
-              }`}
-            />
-          ))}
+    <OnboardingShell step={step}>
+      <div className="flex flex-col h-full md:h-full w-full bg-transparent">
+        <div className="relative flex justify-center items-center gap-2 pt-5 md:pt-10 px-6">
+          <div className="flex gap-2">
+            {Array.from({ length: totalSteps }, (_, i) => (
+              <div
+                key={i}
+                className={`h-1 rounded-full transition-all duration-300 ${
+                  i === step
+                    ? "w-5 bg-primary"
+                    : i < step
+                      ? "w-1.5 bg-primary/30"
+                      : "w-1.5 bg-border/60"
+                }`}
+              />
+            ))}
+          </div>
+          {showLoginShortcut && (
+            <Button
+              variant="secondary"
+              size="xs"
+              onClick={() => router.push("/login")}
+              className="absolute right-6"
+            >
+              Ya tengo cuenta
+            </Button>
+          )}
         </div>
-        {showLoginShortcut && (
-          <Button
-            variant="secondary"
-            size="xs"
-            onClick={() => router.push("/login")}
-            className="absolute right-6"
-          >
-            Ya tengo cuenta
-          </Button>
+
+        {step === 0 && <WelcomeStep onNext={() => setStep(1)} />}
+        {step === 1 && <PhilosophyStep onNext={() => setStep(2)} />}
+        {step === 2 && (
+          <NameStep
+            onNext={() => setStep(3)}
+            name={name}
+            onNameChange={setName}
+          />
+        )}
+        {step === 3 && (
+          <LedgerTypeStep
+            onNext={handleLedgerNext}
+            ledgerTypes={ledgerTypes}
+            onToggleLedgerType={toggleLedgerType}
+          />
+        )}
+        {step === 4 && hasBusiness && (
+          <BusinessSetupStep
+            onNext={() => setStep(5)}
+            businessName={businessName}
+            onBusinessNameChange={setBusinessName}
+            businessType={businessType}
+            onBusinessTypeChange={setBusinessType}
+          />
+        )}
+        {step === 5 && (
+          <SignupPhoneStep
+            name={name}
+            ledgerTypes={ledgerTypes}
+            businessName={businessName}
+            businessType={businessType}
+          />
         )}
       </div>
-
-      {step === 0 && <WelcomeStep onNext={() => setStep(1)} />}
-      {step === 1 && <PhilosophyStep onNext={() => setStep(2)} />}
-      {step === 2 && (
-        <NameStep
-          onNext={() => setStep(3)}
-          name={name}
-          onNameChange={setName}
-        />
-      )}
-      {step === 3 && (
-        <LedgerTypeStep
-          onNext={handleLedgerNext}
-          ledgerTypes={ledgerTypes}
-          onToggleLedgerType={toggleLedgerType}
-        />
-      )}
-      {step === 4 && hasBusiness && (
-        <BusinessSetupStep
-          onNext={() => setStep(5)}
-          businessName={businessName}
-          onBusinessNameChange={setBusinessName}
-          businessType={businessType}
-          onBusinessTypeChange={setBusinessType}
-        />
-      )}
-      {step === 5 && (
-        <SignupPhoneStep
-          name={name}
-          ledgerTypes={ledgerTypes}
-          businessName={businessName}
-          businessType={businessType}
-        />
-      )}
-    </div>
+    </OnboardingShell>
   );
 }

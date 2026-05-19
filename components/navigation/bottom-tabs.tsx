@@ -49,7 +49,7 @@ export function BottomTabs() {
   const isChatActive = pathname.startsWith("/chat");
 
   return (
-    <nav className="relative border-t border-border/20 bg-white pb-[env(safe-area-inset-bottom)] h-14">
+    <nav className="md:hidden relative border-t border-border/20 bg-white pb-[env(safe-area-inset-bottom)] h-14">
       <div className="flex items-center justify-around px-2 h-14">
         <TabLink
           href="/dashboard"
