@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { LedgerTypeStep } from "@/app/(onboarding)/components/ledger-type-step";
-import { BusinessSetupStep } from "@/app/(onboarding)/components/business-setup-step";
+import { LedgerTypeStep } from "@/app/onboarding/components/ledger-type-step";
+import { BusinessSetupStep } from "@/app/onboarding/components/business-setup-step";
 import { createLedgerAction } from "@/core/ledger/presentation/ledger.actions";
-import type { LedgerKind } from "@/app/(onboarding)/components/types";
+import type { LedgerKind } from "@/app/onboarding/components/types";
 
 interface SetupLedgerClientProps {
   defaultName: string;
