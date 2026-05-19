@@ -28,7 +28,7 @@ export default async function AppLayout({
 
   return (
     <LedgerProvider ledgers={ledgers} initialLedger={initialLedger}>
-      <div className="relative flex h-dvh w-full  shadow-xl   overflow-hidden">
+      <div className="relative flex h-dvh w-full container mx-auto shadow-xl   overflow-hidden">
         <InkGlow className="absolute -top-32 -right-40 w-[640px] h-[640px] opacity-[0.10] pointer-events-none text-accent z-0" />
 
         <AppSidebar />
