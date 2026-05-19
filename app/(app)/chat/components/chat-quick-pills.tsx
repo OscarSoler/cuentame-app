@@ -18,7 +18,7 @@ export function ChatQuickPills({
   const actions = getQuickActions(ledgerType);
 
   return (
-    <div className="px-4 py-1 bg-transparent">
+    <div className="px-4 py-1">
       <div className="flex gap-1.5 overflow-x-auto -mx-1 px-1 [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
         {actions.map((a) => (
           <button

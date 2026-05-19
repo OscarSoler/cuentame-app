@@ -10,7 +10,7 @@ export function MobileFrameShell({
   contentMaxWidth?: string;
 }) {
   return (
-    <div className="relative h-dvh md:min-h-dvh md:h-auto w-full container mx-auto bg-white md:bg-transparent overflow-hidden md:overflow-visible">
+    <div className="relative h-dvh md:min-h-dvh md:h-auto w-full container mx-auto bg-transparent overflow-hidden md:overflow-visible">
       <div
         aria-hidden
         className="hidden md:block pointer-events-none absolute inset-0 overflow-hidden"

@@ -5,7 +5,7 @@ import { Plant01Icon } from "@hugeicons/core-free-icons";
 function GhostPillar({ opacity = 1 }: { opacity?: number }) {
   return (
     <div
-      className="flex flex-col items-center gap-2 bg-white/60 rounded-xl px-2 pt-3 pb-2.5 border border-dashed border-border/50"
+      className="flex flex-col items-center gap-2 bg-white/60 rounded-2xl px-2 pt-3 pb-2.5 border border-dashed border-border/50"
       style={{ opacity }}
     >
       <div className="relative w-14 h-14">
