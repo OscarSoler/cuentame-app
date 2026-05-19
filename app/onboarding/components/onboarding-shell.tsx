@@ -11,7 +11,10 @@ export function OnboardingShell({
   children: React.ReactNode;
 }) {
   return (
-    <MobileFrameShell narrative={<OnboardingNarrative step={step} />}>
+    <MobileFrameShell
+      narrative={<OnboardingNarrative step={step} />}
+      contentMaxWidth="md:max-w-5xl"
+    >
       {children}
     </MobileFrameShell>
   );
