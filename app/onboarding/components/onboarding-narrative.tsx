@@ -1,12 +1,5 @@
 "use client";
 
-const questions = [
-  "¿Cuánto dinero tengo este mes?",
-  "¿Cuánto estoy gastando?",
-  "¿Cuánto puedo ahorrar o invertir?",
-  "¿Cómo puedo mejorar el mes siguiente?",
-];
-
 function Stage({ children }: { children: React.ReactNode }) {
   return (
     <div className="relative max-w-xl w-full animate-[fadeIn_400ms_ease-out]">
@@ -51,59 +44,7 @@ export function OnboardingNarrative({ step }: { step: number }) {
     <div key={step} className="relative w-full flex items-center">
       {step === 0 && (
         <Stage>
-          <Kanji className="-top-16 -right-10 rotate-[-4deg]" />
-          <Chapter number="00" label="Bienvenido" />
-          <h2 className="font-heading text-5xl lg:text-6xl leading-[1.05] tracking-tight text-foreground font-medium">
-            Tu santuario{" "}
-            <span className="italic font-normal text-primary">
-              financiero
-            </span>
-            .
-          </h2>
-          <p className="mt-6 text-base lg:text-lg text-muted-foreground leading-relaxed max-w-md">
-            Diseñado para llevar en el bolsillo. Cada gasto, una pregunta. Cada
-            mes, una respuesta.
-          </p>
-          <div className="mt-12 flex items-center gap-3 text-xs tracking-[0.3em] uppercase text-foreground/40">
-            <span className="block w-8 h-px bg-foreground/30" />
-            Hecho en Colombia
-          </div>
-        </Stage>
-      )}
-
-      {step === 1 && (
-        <Stage>
-          <Kanji className="-top-20 right-0 rotate-[3deg]" />
-          <Chapter number="01" label="La metodología" />
-          <h2 className="font-heading text-5xl lg:text-6xl leading-[1.05] tracking-tight text-foreground font-medium">
-            Lleva{" "}
-            <span className="italic font-normal text-primary">
-              120 años
-            </span>{" "}
-            funcionando.
-          </h2>
-          <p className="mt-6 text-base lg:text-lg text-muted-foreground leading-relaxed max-w-md">
-            <em>Kakebo</em> no mide cuánto tienes. Mide qué tan consciente eres
-            de lo que haces con tu dinero.
-          </p>
-          <ol className="mt-10 space-y-3 max-w-md">
-            {questions.map((q, i) => (
-              <li key={q} className="flex gap-4 items-start">
-                <span className="font-mono text-[11px] tabular-nums text-primary/60 mt-1.5">
-                  0{i + 1}
-                </span>
-                <span className="font-heading text-lg text-foreground/85 leading-snug">
-                  {q}
-                </span>
-              </li>
-            ))}
-          </ol>
-        </Stage>
-      )}
-
-      {step === 2 && (
-        <Stage>
-          <Chapter number="02" label="Empezamos por ti" />
+          <Chapter number="00" label="Empezamos por ti" />
           <h2 className="font-heading text-5xl lg:text-6xl leading-[1.05] tracking-tight text-foreground font-medium">
             Lo más{" "}
             <span className="italic font-normal text-primary">
@@ -128,9 +69,9 @@ export function OnboardingNarrative({ step }: { step: number }) {
         </Stage>
       )}
 
-      {step === 3 && (
+      {step === 1 && (
         <Stage>
-          <Chapter number="03" label="Dos cuadernos" />
+          <Chapter number="01" label="Dos cuadernos" />
           <h2 className="font-heading text-5xl lg:text-6xl leading-[1.05] tracking-tight text-foreground font-medium">
             Dos vidas,{" "}
             <span className="italic font-normal text-primary">
@@ -166,9 +107,9 @@ export function OnboardingNarrative({ step }: { step: number }) {
         </Stage>
       )}
 
-      {step === 4 && (
+      {step === 2 && (
         <Stage>
-          <Chapter number="04" label="Tu negocio" />
+          <Chapter number="02" label="Tu negocio" />
           <h2 className="font-heading text-5xl lg:text-6xl leading-[1.05] tracking-tight text-foreground font-medium">
             Vendías bien.{" "}
             <span className="italic font-normal text-primary">
@@ -192,10 +133,10 @@ export function OnboardingNarrative({ step }: { step: number }) {
         </Stage>
       )}
 
-      {step === 5 && (
+      {step === 3 && (
         <Stage>
           <Kanji className="-top-16 -right-8 rotate-[-2deg]" />
-          <Chapter number="05" label="Un último paso" />
+          <Chapter number="03" label="Un último paso" />
           <h2 className="font-heading text-5xl lg:text-6xl leading-[1.05] tracking-tight text-foreground font-medium">
             Tu cuaderno{" "}
             <span className="italic font-normal text-primary">

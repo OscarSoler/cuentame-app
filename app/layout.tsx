@@ -68,14 +68,14 @@ export default async function RootLayout({
       ? "theme-editorial"
       : themeCookie === "vibrant"
         ? "theme-vibrant"
-        : themeCookie === "aurora"
-          ? "theme-aurora"
-          : "";
+        : themeCookie === "zen"
+          ? ""
+          : "theme-aurora";
 
   return (
     <html
       lang="es"
-      className={`${geistSans.variable} ${geistMono.variable} ${bricolage.variable} ${fraunces.variable} ${inter.variable} ${spaceGrotesk.variable} ${themeClass} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${bricolage.variable} ${fraunces.variable} ${inter.variable} ${spaceGrotesk.variable} ${themeClass} h-full antialiased scroll-smooth`}
     >
       <body className="h-dvh flex flex-col" suppressHydrationWarning>
         <div

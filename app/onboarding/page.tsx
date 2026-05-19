@@ -5,8 +5,6 @@ import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { OnboardingShell } from "./components/onboarding-shell";
-import { WelcomeStep } from "./components/welcome-step";
-import { PhilosophyStep } from "./components/philosophy-step";
 import { NameStep } from "./components/name-step";
 import { LedgerTypeStep } from "./components/ledger-type-step";
 import { BusinessSetupStep } from "./components/business-setup-step";
@@ -22,7 +20,7 @@ export default function OnboardingPage() {
   const [businessType, setBusinessType] = useState("");
 
   const hasBusiness = ledgerTypes.includes("business");
-  const totalSteps = hasBusiness ? 6 : 5;
+  const totalSteps = hasBusiness ? 4 : 3;
 
   const toggleLedgerType = (type: LedgerKind) => {
     setLedgerTypes((prev) =>
@@ -30,9 +28,9 @@ export default function OnboardingPage() {
     );
   };
 
-  const handleLedgerNext = () => setStep(hasBusiness ? 4 : 5);
+  const handleLedgerNext = () => setStep(hasBusiness ? 2 : 3);
 
-  const showLoginShortcut = step > 0 && step < totalSteps - 1;
+  const showLoginShortcut = step >= 0 && step < totalSteps - 1;
 
   return (
     <OnboardingShell step={step}>
@@ -64,32 +62,30 @@ export default function OnboardingPage() {
           )}
         </div>
 
-        {step === 0 && <WelcomeStep onNext={() => setStep(1)} />}
-        {step === 1 && <PhilosophyStep onNext={() => setStep(2)} />}
-        {step === 2 && (
+        {step === 0 && (
           <NameStep
-            onNext={() => setStep(3)}
+            onNext={() => setStep(1)}
             name={name}
             onNameChange={setName}
           />
         )}
-        {step === 3 && (
+        {step === 1 && (
           <LedgerTypeStep
             onNext={handleLedgerNext}
             ledgerTypes={ledgerTypes}
             onToggleLedgerType={toggleLedgerType}
           />
         )}
-        {step === 4 && hasBusiness && (
+        {step === 2 && hasBusiness && (
           <BusinessSetupStep
-            onNext={() => setStep(5)}
+            onNext={() => setStep(3)}
             businessName={businessName}
             onBusinessNameChange={setBusinessName}
             businessType={businessType}
             onBusinessTypeChange={setBusinessType}
           />
         )}
-        {step === 5 && (
+        {step === 3 && (
           <SignupPhoneStep
             name={name}
             ledgerTypes={ledgerTypes}
