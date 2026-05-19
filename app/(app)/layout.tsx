@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { BottomTabs } from "@/components/navigation/bottom-tabs";
+import { InkGlow } from "@/components/ink-glow";
 import { LedgerProvider } from "@/lib/context/ledger-context";
 import type { Ledger } from "@/lib/ledger/types";
 import { readStoredLedgerType } from "@/lib/ledger/preference.server";
@@ -25,8 +26,9 @@ export default async function AppLayout({
 
   return (
     <LedgerProvider ledgers={ledgers} initialLedger={initialLedger}>
-      <div className="flex flex-col h-dvh w-full container mx-auto   shadow-xl bg-transparent">
-        <div className="flex-1 overflow-y-auto" data-scroll-container>
+      <div className="relative flex flex-col h-dvh w-full container mx-auto shadow-xl bg-transparent overflow-hidden">
+        <InkGlow className="absolute -top-32 -right-40 w-[640px] h-[640px] opacity-[0.10] pointer-events-none text-accent z-0" />
+        <div className="relative z-10 flex-1 overflow-y-auto" data-scroll-container>
           {children}
         </div>
         <BottomTabs />

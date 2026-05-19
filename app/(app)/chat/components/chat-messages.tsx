@@ -149,7 +149,7 @@ export function ChatMessages({
                       return (
                         <div
                           key={`${message.id}-${i}`}
-                          className="rounded-2xl rounded-br-md px-4 py-2.5 text-[14px] leading-relaxed bg-gradient-to-br from-primary to-[#3a6a1d] text-primary-foreground shadow-[0_2px_8px_rgba(45,80,22,0.18)]"
+                          className="rounded-2xl rounded-br-md px-4 py-2.5 text-[14px] leading-relaxed bg-primary text-primary-foreground shadow-[0_2px_8px_rgba(45,80,22,0.18)]"
                         >
                           <p className="whitespace-pre-wrap break-words">{part.text}</p>
                         </div>
@@ -167,13 +167,12 @@ export function ChatMessages({
               key={message.id}
               className="flex flex-col gap-1.5 items-start max-w-[92%]"
             >
-              {isFirstInGroup && <AssistantAvatar />}
               {message.parts.map((part, i) => {
                 if (part.type === "text" && part.text) {
                   return (
                     <div
                       key={`${message.id}-${i}`}
-                      className="rounded-2xl rounded-tl-md px-4 py-2.5 text-[14px] leading-relaxed bg-cream/80 backdrop-blur-sm text-foreground border border-border/40 shadow-[0_1px_3px_rgba(45,80,22,0.04)] prose prose-sm max-w-none break-words [&>*:first-child]:mt-0 [&>*:last-child]:mb-0"
+                      className="rounded-2xl rounded-tl-md px-4 py-2.5 text-[14px] leading-relaxed bg-white text-foreground border border-border/40 shadow-[0_1px_3px_rgba(45,80,22,0.04)] prose prose-sm max-w-none break-words [&>*:first-child]:mt-0 [&>*:last-child]:mb-0"
                     >
                       <Streamdown>{part.text}</Streamdown>
                     </div>
@@ -188,8 +187,7 @@ export function ChatMessages({
 
         {isLoading && messages[messages.length - 1]?.role === "user" && (
           <div className="flex flex-col gap-1.5 items-start">
-            <AssistantAvatar />
-            <div className="bg-cream/80 backdrop-blur-sm border border-border/40 rounded-2xl rounded-tl-md px-4 py-3 w-fit shadow-[0_1px_3px_rgba(45,80,22,0.04)]">
+            <div className="bg-white border border-border/40 rounded-2xl rounded-tl-md px-4 py-3 w-fit shadow-[0_1px_3px_rgba(45,80,22,0.04)]">
               <div className="flex gap-1.5 items-center">
                 <span className="w-1.5 h-1.5 rounded-full bg-primary/50 animate-bounce [animation-delay:0ms]" />
                 <span className="w-1.5 h-1.5 rounded-full bg-primary/50 animate-bounce [animation-delay:150ms]" />

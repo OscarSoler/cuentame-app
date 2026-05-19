@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { InkGlow } from "@/components/ink-glow";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   ArrowRight01Icon,
@@ -36,20 +37,7 @@ const flow = [
 export function HeroSection() {
   return (
     <section className="relative px-6 md:px-10 pt-14 md:pt-20 pb-20 md:pb-28 overflow-hidden">
-      <svg
-        aria-hidden
-        className="absolute -top-20 -right-32 w-[640px] h-[640px] opacity-[0.07] pointer-events-none text-primary"
-        viewBox="0 0 600 600"
-      >
-        <defs>
-          <radialGradient id="ink" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="currentColor" stopOpacity="0.9" />
-            <stop offset="60%" stopColor="currentColor" stopOpacity="0.4" />
-            <stop offset="100%" stopColor="currentColor" stopOpacity="0" />
-          </radialGradient>
-        </defs>
-        <circle cx="300" cy="300" r="280" fill="url(#ink)" />
-      </svg>
+      <InkGlow />
 
       <div className="max-w-6xl mx-auto grid lg:grid-cols-12 gap-12 lg:gap-16 items-center">
         {/* Left column — copy */}

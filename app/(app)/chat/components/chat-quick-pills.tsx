@@ -26,17 +26,17 @@ export function ChatQuickPills({
             type="button"
             disabled={isLoading}
             onClick={() => onSelect(a.prompt)}
-            className="flex items-center gap-1.5 bg-accent/30 hover:bg-accent/50 rounded-full pl-1.5 pr-3 py-1 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
+            className="flex items-center gap-1.5 bg-white border border-primary/25 hover:border-primary/50 hover:bg-primary/[0.04] rounded-full pl-1.5 pr-3 py-1 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
           >
-            <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center">
+            <div className="w-5 h-5 rounded-full bg-primary/12 flex items-center justify-center">
               <HugeiconsIcon
                 icon={a.icon}
                 size={11}
                 className="text-primary"
-                strokeWidth={1.5}
+                strokeWidth={1.8}
               />
             </div>
-            <span className="text-[11px] font-medium text-foreground/70 whitespace-nowrap">
+            <span className="text-[11px] font-medium text-primary whitespace-nowrap">
               {a.title}
             </span>
           </button>

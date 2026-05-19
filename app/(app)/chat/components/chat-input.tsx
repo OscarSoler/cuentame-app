@@ -159,16 +159,16 @@ export function ChatInput({ isDrawer, isLoading, activeLedgerType, onSubmit, onL
               <button
                 type="button"
                 onClick={() => setLedgerOpen(!ledgerOpen)}
-                className="flex items-center gap-2 bg-accent/30 hover:bg-accent/50 rounded-full pl-2 pr-3 py-1.5 transition-colors cursor-pointer"
+                className="flex items-center gap-2 bg-white border border-primary/25 hover:border-primary/50 hover:bg-primary/[0.04] rounded-full pl-2 pr-3 py-1.5 transition-colors cursor-pointer"
               >
-                <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
-                  <HugeiconsIcon icon={activeLedgerOption.icon} size={13} className="text-primary" strokeWidth={1.6} />
+                <div className="w-6 h-6 rounded-full bg-primary/12 flex items-center justify-center">
+                  <HugeiconsIcon icon={activeLedgerOption.icon} size={13} className="text-primary" strokeWidth={1.8} />
                 </div>
-                <span className="text-[12.5px] font-medium text-foreground/80">{activeLedgerOption.label}</span>
+                <span className="text-[12.5px] font-medium text-primary">{activeLedgerOption.label}</span>
                 <HugeiconsIcon
                   icon={ArrowDown01Icon}
                   size={11}
-                  className={`text-muted-foreground/50 transition-transform ${ledgerOpen ? "rotate-180" : ""}`}
+                  className={`text-primary/60 transition-transform ${ledgerOpen ? "rotate-180" : ""}`}
                 />
               </button>
               {ledgerOpen && (
@@ -201,14 +201,14 @@ export function ChatInput({ isDrawer, isLoading, activeLedgerType, onSubmit, onL
                 type="button"
                 onClick={() => setAttachOpen((v) => !v)}
                 disabled={uploading || isLoading}
-                className="w-9 h-9 rounded-full bg-accent/30 hover:bg-accent/50 flex items-center justify-center cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="w-9 h-9 rounded-full bg-white border border-primary/25 hover:border-primary/50 hover:bg-primary/[0.04] flex items-center justify-center cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 aria-label="Adjuntar foto"
                 aria-expanded={attachOpen}
               >
                 <HugeiconsIcon
                   icon={PlusSignIcon}
                   size={16}
-                  className={`text-foreground/70 transition-transform duration-200 ${attachOpen ? "rotate-45" : ""}`}
+                  className={`text-primary transition-transform duration-200 ${attachOpen ? "rotate-45" : ""}`}
                   strokeWidth={2}
                 />
               </button>

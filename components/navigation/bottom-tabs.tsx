@@ -30,7 +30,7 @@ function TabLink({
           strokeWidth={isActive ? 1.8 : 1.5}
         />
         {isActive && (
-          <span className="absolute -top-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary" />
+          <span className="absolute -top-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-accent" />
         )}
       </div>
       <span
@@ -49,7 +49,7 @@ export function BottomTabs() {
   const isChatActive = pathname.startsWith("/chat");
 
   return (
-    <nav className="relative border-t border-border/20 bg-[#FAF7F2]/80 backdrop-blur-xl pb-[env(safe-area-inset-bottom)] h-14">
+    <nav className="relative border-t border-border/20 bg-white pb-[env(safe-area-inset-bottom)] h-14">
       <div className="flex items-center justify-around px-2 h-14">
         <TabLink
           href="/dashboard"
@@ -77,7 +77,9 @@ export function BottomTabs() {
           </div>
           <span
             className={`text-[10px] mt-0.5 ${
-              isChatActive ? "text-primary font-medium" : "text-muted-foreground/60"
+              isChatActive
+                ? "text-primary font-medium"
+                : "text-muted-foreground/60"
             }`}
           >
             Cuéntame
