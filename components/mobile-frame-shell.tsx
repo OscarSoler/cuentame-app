@@ -19,12 +19,12 @@ export function MobileFrameShell({
         <InkGlow className="absolute -bottom-40 -right-40 w-[600px] h-[600px] opacity-[0.06] text-accent" />
       </div>
 
-      <div className={`relative md:grid md:grid-cols-12 md:gap-0 md:min-h-dvh md:items-center md:px-10 lg:px-16 md:py-10 md:mx-auto ${contentMaxWidth}`}>
+      <div className={`relative h-full md:h-auto md:grid md:grid-cols-12 md:gap-0 md:min-h-dvh md:items-center md:px-10 lg:px-16 md:py-10 md:mx-auto ${contentMaxWidth}`}>
         <aside className="hidden md:flex md:col-span-7 lg:col-span-7 md:items-center md:justify-center md:pr-10 lg:pr-16 md:order-1">
           {narrative}
         </aside>
 
-        <div className="md:col-span-5 lg:col-span-5 md:flex md:justify-center md:items-center md:order-2">
+        <div className="h-full md:h-auto md:col-span-5 lg:col-span-5 md:flex md:justify-center md:items-center md:order-2">
           <div
             className="
               relative
