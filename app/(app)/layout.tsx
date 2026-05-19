@@ -25,7 +25,7 @@ export default async function AppLayout({
 
   return (
     <LedgerProvider ledgers={ledgers} initialLedger={initialLedger}>
-      <div className="flex flex-col h-dvh w-full">
+      <div className="flex flex-col h-dvh w-full container mx-auto   shadow-xl bg-transparent">
         <div className="flex-1 overflow-y-auto" data-scroll-container>
           {children}
         </div>

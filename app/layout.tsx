@@ -1,5 +1,13 @@
 import type { Metadata } from "next";
-import { Geist, Bricolage_Grotesque } from "next/font/google";
+import {
+  Geist,
+  Geist_Mono,
+  Bricolage_Grotesque,
+  Fraunces,
+  Inter,
+  Space_Grotesk,
+} from "next/font/google";
+import { cookies } from "next/headers";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -8,13 +16,35 @@ const geistSans = Geist({
 });
 
 const bricolage = Bricolage_Grotesque({
-  variable: "--font-heading",
+  variable: "--font-heading-raw",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700", "800"],
 });
 
+const fraunces = Fraunces({
+  variable: "--font-editorial-heading-raw",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
+
+const inter = Inter({
+  variable: "--font-editorial-sans-raw",
+  subsets: ["latin"],
+});
+
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-vibrant-heading-raw",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
 export const metadata: Metadata = {
-  title: "Cuéntame — Tu Santuario Financiero",
+  title: "Cuéntame — Tu Coach Financiero",
   description:
     "Domina el arte japonés del ahorro con el método Kakebo. Transforma tus gastos en rituales de prosperidad.",
 };
@@ -26,27 +56,36 @@ export const viewport = {
   userScalable: false,
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookieStore = await cookies();
+  const themeCookie = cookieStore.get("theme")?.value;
+  const themeClass =
+    themeCookie === "editorial"
+      ? "theme-editorial"
+      : themeCookie === "vibrant"
+        ? "theme-vibrant"
+        : themeCookie === "aurora"
+          ? "theme-aurora"
+          : "";
+
   return (
     <html
       lang="es"
-      className={`${geistSans.variable} ${bricolage.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${bricolage.variable} ${fraunces.variable} ${inter.variable} ${spaceGrotesk.variable} ${themeClass} h-full antialiased`}
     >
       <body className="h-dvh flex flex-col" suppressHydrationWarning>
         <div
-          className="fixed inset-0 -z-10 h-full w-full bg-[#F5F0E8]"
+          className="fixed inset-0 -z-10 h-full w-full"
           style={{
             background:
-              "radial-gradient(125% 125% at 50% 10%, #F5F0E8 40%, #E8E0D0 100%)",
+              "radial-gradient(125% 125% at 50% 10%, var(--surface-from) 40%, var(--surface-to) 100%)",
           }}
         />
-        <div className="container mx-auto h-full flex flex-col shadow-xl bg-transparent">
-          {children}
-        </div>
+        <div className="">{children}</div>
       </body>
     </html>
   );
