@@ -8,7 +8,7 @@ export function MobileFrameShell({
   children: React.ReactNode;
 }) {
   return (
-    <div className="relative min-h-dvh w-full">
+    <div className="relative min-h-dvh w-full container mx-auto bg-white md:bg-transparent">
       <div
         aria-hidden
         className="hidden md:block pointer-events-none absolute inset-0 overflow-hidden"
