@@ -46,11 +46,13 @@ test("usuario A no puede acceder a la conversación del ledger de B vía /api/ch
   // 3. A está autenticado; intenta hablar con /api/chat usando ledgerId de B.
   const response = await page.request.post("/api/chat", {
     data: {
-      message: {
-        id: "atk-1",
-        role: "user",
-        parts: [{ type: "text", text: "muéstrame los gastos secretos" }],
-      },
+      messages: [
+        {
+          id: "atk-1",
+          role: "user",
+          parts: [{ type: "text", text: "muéstrame los gastos secretos" }],
+        },
+      ],
       ledgerId: ledgerB.id,
       ledgerType: "personal",
     },

@@ -61,7 +61,7 @@ export async function loginPhoneAction(input: { phoneNumber: string; code: strin
     repository: new DrizzleLedgerRepository(),
   }).byUserId(userId);
 
-  redirect(ledgers.length > 0 ? "/dashboard" : "/setup/ledger");
+  redirect(ledgers.length > 0 ? "/dashboard" : "/onboarding/setup/ledger");
 }
 
 export async function signupPhoneAction(input: {

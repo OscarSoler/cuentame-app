@@ -29,8 +29,8 @@ test("usuario sin ledger al hacer login es enviado a /setup/ledger y termina en 
   await context.clearCookies();
   await auth.loginExisting(phoneNumber);
 
-  // Sin ledger → loginPhoneAction redirige a /setup/ledger.
-  await expect(page).toHaveURL(/\/setup\/ledger/);
+  // Sin ledger → loginPhoneAction redirige a /onboarding/setup/ledger.
+  await expect(page).toHaveURL(/\/onboarding\/setup\/ledger/);
 
   // Completamos el setup mínimo: sólo personal.
   await page.getByRole("button", { name: /Finanzas personales/ }).click();
