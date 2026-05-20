@@ -274,7 +274,7 @@ export function ChatInput({ isDrawer, isLoading, activeLedgerType, onSubmit, onL
           <button
             type="submit"
             disabled={!canSubmit}
-            className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center shrink-0 disabled:opacity-15 transition-opacity cursor-pointer"
+            className="w-9 h-9 rounded-full bg-accent text-accent-foreground flex items-center justify-center shrink-0 disabled:opacity-15 transition-opacity cursor-pointer"
           >
             <HugeiconsIcon icon={ArrowUp02Icon} size={16} strokeWidth={2} />
           </button>

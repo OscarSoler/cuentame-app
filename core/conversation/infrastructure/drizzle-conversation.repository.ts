@@ -2,11 +2,11 @@ import { db } from "@/lib/db";
 import { conversations, ledgers, messages } from "@/lib/db/schema";
 import { and, asc, desc, eq } from "drizzle-orm";
 import { Conversation } from "../domain/conversation.entity";
-import { Message, MessageRole } from "../domain/message.entity";
+import { Message, toMessageRole } from "../domain/message.entity";
 import {
   ConversationRepository,
   CreateConversationData,
-  NewMessageData,
+  PersistedMessage,
 } from "../domain/conversation.repository";
 
 type ConversationRow = typeof conversations.$inferSelect;
@@ -16,7 +16,8 @@ function toMessage(row: MessageRow): Message {
   return new Message({
     id: row.id,
     conversationId: row.conversationId,
-    role: row.role as MessageRole,
+    seq: row.seq,
+    role: toMessageRole(row.role),
     parts: row.parts,
     createdAt: row.createdAt,
   });
@@ -55,7 +56,7 @@ export class DrizzleConversationRepository implements ConversationRepository {
       .select()
       .from(messages)
       .where(eq(messages.conversationId, id))
-      .orderBy(asc(messages.createdAt));
+      .orderBy(asc(messages.seq));
 
     return toConversation(row, msgRows.map(toMessage));
   }
@@ -107,59 +108,17 @@ export class DrizzleConversationRepository implements ConversationRepository {
     return toConversation(row);
   }
 
-  async appendMessage(
+  async saveMessages(
     conversationId: string,
-    data: NewMessageData,
-  ): Promise<Message> {
-    return db.transaction(async (tx) => {
-      const [row] = await tx
-        .insert(messages)
-        .values({
-          conversationId,
-          role: data.role,
-          parts: data.parts,
-        })
-        .returning();
-
-      await tx
-        .update(conversations)
-        .set({ updatedAt: new Date() })
-        .where(eq(conversations.id, conversationId));
-
-      return toMessage(row);
-    });
-  }
-
-  async appendMessages(
-    conversationId: string,
-    newMessages: NewMessageData[],
-  ): Promise<void> {
-    if (newMessages.length === 0) return;
-    await db.transaction(async (tx) => {
-      await tx.insert(messages).values(
-        newMessages.map((m) => ({
-          conversationId,
-          role: m.role,
-          parts: m.parts,
-        })),
-      );
-      await tx
-        .update(conversations)
-        .set({ updatedAt: new Date() })
-        .where(eq(conversations.id, conversationId));
-    });
-  }
-
-  async replaceMessages(
-    conversationId: string,
-    newMessages: NewMessageData[],
+    msgs: PersistedMessage[],
   ): Promise<void> {
     await db.transaction(async (tx) => {
       await tx.delete(messages).where(eq(messages.conversationId, conversationId));
-      if (newMessages.length > 0) {
+      if (msgs.length > 0) {
         await tx.insert(messages).values(
-          newMessages.map((m) => ({
+          msgs.map((m) => ({
             conversationId,
+            seq: m.seq,
             role: m.role,
             parts: m.parts,
           })),

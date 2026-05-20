@@ -2,14 +2,14 @@
 
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLedger } from "@/lib/context/ledger-context";
 import {
   getConversationMessagesAction,
   getOrCreateLatestConversationAction,
-  replaceMessagesAction,
+  saveMessagesAction,
 } from "@/core/conversation/presentation/conversation.actions";
-import type { MessageRole } from "@/core/conversation/domain/message.entity";
+import { toSaveMessagesInput } from "@/core/conversation/application/save-messages";
 import { ChatSuggestions } from "./chat-suggestions";
 import { ChatMessages } from "./chat-messages";
 import { ChatInput } from "./chat-input";
@@ -108,7 +108,7 @@ function ChatContentReady({
         prepareSendMessagesRequest({ messages }) {
           return {
             body: {
-              message: messages[messages.length - 1],
+              messages,
               ledgerId,
               ledgerType,
               conversationId,
@@ -124,19 +124,29 @@ function ChatContentReady({
     transport,
   });
 
+  const persistQueueRef = useRef<Promise<unknown>>(Promise.resolve());
+
+  useEffect(() => {
+    return () => {
+      persistQueueRef.current = Promise.resolve();
+    };
+  }, []);
+
   const persistMessages = useCallback(
     (next: UIMessage[]) => {
-      void replaceMessagesAction({
-        conversationId,
-        messages: next.map((m) => ({
-          role: m.role as MessageRole,
-          parts: m.parts,
-        })),
-      }).then((result) => {
+      const run = async () => {
+        const result = await saveMessagesAction(
+          toSaveMessagesInput(conversationId, next),
+        );
         if (!result.success) {
           console.error("[ChatContent] persist failed:", result.error);
         }
-      });
+      };
+      const next$ = persistQueueRef.current
+        .catch(() => undefined)
+        .then(run);
+      persistQueueRef.current = next$;
+      return next$;
     },
     [conversationId],
   );

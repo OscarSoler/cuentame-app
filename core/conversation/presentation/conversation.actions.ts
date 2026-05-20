@@ -4,12 +4,10 @@ import { requireSession, wrapAction } from "@/core/_shared/action";
 import { assertLedgerOwnership } from "@/core/_shared/ownership";
 import { DrizzleConversationRepository } from "../infrastructure/drizzle-conversation.repository";
 import {
-  AppendMessage,
-  AppendMessages,
   DeleteConversation,
   GetConversation,
   GetOrCreateLatest,
-  ReplaceMessages,
+  SaveMessages,
 } from "../application";
 import type { Conversation } from "../domain/conversation.entity";
 import type { MessageRole } from "../domain/message.entity";
@@ -74,48 +72,17 @@ export async function listConversationsAction(ledgerId: string) {
   });
 }
 
-export interface AppendMessageInput {
-  conversationId: string;
-  role: MessageRole;
-  parts: unknown;
-}
-
-export async function appendMessageAction(input: AppendMessageInput) {
-  return wrapAction(async () => {
-    const session = await requireSession();
-    await requireConversationFor(session.user.id, input.conversationId);
-
-    const message = await new AppendMessage({ repository: repo() }).execute(input);
-    return { id: message.id };
-  });
-}
-
-export interface AppendMessagesInput {
+export interface SaveMessagesInput {
   conversationId: string;
   messages: Array<{ role: MessageRole; parts: unknown }>;
 }
 
-export async function appendMessagesAction(input: AppendMessagesInput) {
+export async function saveMessagesAction(input: SaveMessagesInput) {
   return wrapAction(async () => {
     const session = await requireSession();
     await requireConversationFor(session.user.id, input.conversationId);
 
-    await new AppendMessages({ repository: repo() }).execute(input);
-    return { id: input.conversationId };
-  });
-}
-
-export interface ReplaceMessagesInput {
-  conversationId: string;
-  messages: Array<{ role: MessageRole; parts: unknown }>;
-}
-
-export async function replaceMessagesAction(input: ReplaceMessagesInput) {
-  return wrapAction(async () => {
-    const session = await requireSession();
-    await requireConversationFor(session.user.id, input.conversationId);
-
-    await new ReplaceMessages({ repository: repo() }).execute(input);
+    await new SaveMessages({ repository: repo() }).execute(input);
     return { id: input.conversationId };
   });
 }
@@ -129,4 +96,3 @@ export async function deleteConversationAction(id: string) {
     return { id };
   });
 }
-

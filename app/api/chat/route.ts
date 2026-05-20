@@ -10,22 +10,21 @@ import { requireSession } from "@/core/_shared/action";
 import { assertLedgerOwnership } from "@/core/_shared/ownership";
 import { DrizzleConversationRepository } from "@/core/conversation/infrastructure/drizzle-conversation.repository";
 import {
-  AppendMessages,
-  GetConversation,
   GetOrCreateLatest,
+  SaveMessages,
+  toSaveMessagesInput,
 } from "@/core/conversation/application";
-import type { MessageRole } from "@/core/conversation/domain/message.entity";
 import { getSystemPrompt } from "./system-prompt";
 import { buildChatTools } from "./tools";
 
 export async function POST(req: Request) {
   const {
-    message,
+    messages: incomingMessages,
     ledgerId,
     conversationId: requestedConversationId,
     ledgerType = "personal",
   }: {
-    message: UIMessage;
+    messages: UIMessage[];
     ledgerId: string;
     conversationId?: string;
     ledgerType?: "personal" | "business";
@@ -34,8 +33,8 @@ export async function POST(req: Request) {
   if (!ledgerId) {
     return new Response("ledgerId es requerido", { status: 400 });
   }
-  if (!message) {
-    return new Response("message es requerido", { status: 400 });
+  if (!incomingMessages?.length) {
+    return new Response("messages es requerido", { status: 400 });
   }
 
   const session = await requireSession();
@@ -66,15 +65,9 @@ export async function POST(req: Request) {
   }
 
   const tools = buildChatTools({ ledgerId, ledgerType });
-  const previous = await new GetConversation({
-    repository: conversationRepo,
-  }).byIdWithMessages(conversationId);
-  const previousMessages = (previous?.messages ?? []).map(
-    (m) => ({ id: m.id, role: m.role, parts: m.parts }) as UIMessage,
-  );
 
   const messages = await validateUIMessages({
-    messages: [...previousMessages, message],
+    messages: incomingMessages,
     tools: tools as Record<string, Tool<unknown, unknown>>,
   });
 
@@ -93,14 +86,10 @@ export async function POST(req: Request) {
 
   return result.toUIMessageStreamResponse({
     originalMessages: messages,
-    async onFinish({ responseMessage }) {
-      await new AppendMessages({ repository: conversationRepo }).execute({
-        conversationId,
-        messages: [message, responseMessage].map((m) => ({
-          role: m.role as MessageRole,
-          parts: m.parts,
-        })),
-      });
+    async onFinish({ messages: finalMessages }) {
+      await new SaveMessages({ repository: conversationRepo }).execute(
+        toSaveMessagesInput(conversationId, finalMessages),
+      );
     },
   });
 }

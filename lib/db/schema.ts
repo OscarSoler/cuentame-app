@@ -80,9 +80,9 @@ export const budgets = pgTable(
       t.ledgerId,
       t.pillar,
       t.year,
-      t.month
+      t.month,
     ),
-  ]
+  ],
 );
 
 // ─── Reflections (Diario mensual Kakebo) ─────────────────
@@ -109,9 +109,9 @@ export const reflections = pgTable(
     uniqueIndex("reflections_ledger_year_month_idx").on(
       t.ledgerId,
       t.year,
-      t.month
+      t.month,
     ),
-  ]
+  ],
 );
 
 // ─── Conversations ───────────────────────────────────────
@@ -125,10 +125,14 @@ export const conversations = pgTable(
       .notNull()
       .references(() => ledgers.id, { onDelete: "cascade" }),
     title: varchar("title"),
-    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
   },
-  (t) => [index("conversations_ledger_idx").on(t.ledgerId, t.updatedAt)]
+  (t) => [index("conversations_ledger_idx").on(t.ledgerId, t.updatedAt)],
 );
 
 // ─── Messages ────────────────────────────────────────────
@@ -141,9 +145,14 @@ export const messages = pgTable(
     conversationId: uuid("conversation_id")
       .notNull()
       .references(() => conversations.id, { onDelete: "cascade" }),
+    seq: integer("seq").notNull(),
     role: varchar("role").notNull(), // user | assistant | system
     parts: jsonb("parts").notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
   },
-  (t) => [index("messages_conversation_idx").on(t.conversationId, t.createdAt)]
+  (t) => [
+    uniqueIndex("messages_conversation_seq_idx").on(t.conversationId, t.seq),
+  ],
 );

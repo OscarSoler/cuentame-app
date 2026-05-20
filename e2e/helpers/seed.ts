@@ -1,4 +1,13 @@
+import { eq, sql } from "drizzle-orm";
 import { testDb, schema } from "./db";
+
+async function nextSeq(conversationId: string): Promise<number> {
+  const [row] = await testDb
+    .select({ count: sql<number>`count(*)::int` })
+    .from(schema.messages)
+    .where(eq(schema.messages.conversationId, conversationId));
+  return row?.count ?? 0;
+}
 
 export interface SeedLedger {
   type: "personal" | "business";
@@ -48,10 +57,12 @@ export interface SeedMessage {
 }
 
 export async function seedMessage(input: SeedMessage) {
+  const seq = await nextSeq(input.conversationId);
   const [row] = await testDb
     .insert(schema.messages)
     .values({
       conversationId: input.conversationId,
+      seq,
       role: input.role,
       parts: [{ type: "text", text: input.text }],
     })
@@ -78,10 +89,12 @@ export interface SeedAssistantExpenseMessage {
  * exitoso.
  */
 export async function seedAssistantExpenseMessage(input: SeedAssistantExpenseMessage) {
+  const seq = await nextSeq(input.conversationId);
   const [row] = await testDb
     .insert(schema.messages)
     .values({
       conversationId: input.conversationId,
+      seq,
       role: "assistant",
       parts: [
         {
