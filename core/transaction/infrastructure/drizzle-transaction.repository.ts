@@ -13,6 +13,7 @@ import {
   DailyTotal,
   MonthSummary,
   PillarSpent,
+  RangeSummary,
   TransactionRepository,
   UpdateTransactionData,
   WeeklyTotal,
@@ -242,6 +243,56 @@ export class DrizzleTransactionRepository implements TransactionRepository {
       .orderBy(sql`1 desc`);
 
     return rows.map((r) => r.date);
+  }
+
+  async getRangeSummary(
+    ledgerId: string,
+    fromDate: string,
+    toDate: string,
+  ): Promise<RangeSummary> {
+    const [result] = await db
+      .select({
+        income: sql<string>`coalesce(sum(case when ${transactions.type} = 'income' then ${transactions.amount} else 0 end), 0)`,
+        expenses: sql<string>`coalesce(sum(case when ${transactions.type} = 'expense' then ${transactions.amount} else 0 end), 0)`,
+        incomeCount: sql<string>`coalesce(sum(case when ${transactions.type} = 'income' then 1 else 0 end), 0)`,
+        expenseCount: sql<string>`coalesce(sum(case when ${transactions.type} = 'expense' then 1 else 0 end), 0)`,
+        totalCount: sql<string>`count(*)`,
+        taxedCount: sql<string>`coalesce(sum(case when ${transactions.taxType} is not null then 1 else 0 end), 0)`,
+        activeDays: sql<string>`count(distinct ${transactions.date})`,
+        firstDate: sql<string | null>`to_char(min(${transactions.date}), 'YYYY-MM-DD')`,
+        lastDate: sql<string | null>`to_char(max(${transactions.date}), 'YYYY-MM-DD')`,
+      })
+      .from(transactions)
+      .where(
+        and(
+          eq(transactions.ledgerId, ledgerId),
+          gte(transactions.date, fromDate),
+          lte(transactions.date, toDate),
+        ),
+      );
+
+    return {
+      income: Number(result?.income ?? 0),
+      expenses: Number(result?.expenses ?? 0),
+      incomeCount: Number(result?.incomeCount ?? 0),
+      expenseCount: Number(result?.expenseCount ?? 0),
+      totalCount: Number(result?.totalCount ?? 0),
+      taxedCount: Number(result?.taxedCount ?? 0),
+      activeDays: Number(result?.activeDays ?? 0),
+      firstDate: result?.firstDate ?? null,
+      lastDate: result?.lastDate ?? null,
+    };
+  }
+
+  async getOldestDate(ledgerId: string): Promise<string | null> {
+    const [row] = await db
+      .select({
+        date: sql<string | null>`to_char(min(${transactions.date}), 'YYYY-MM-DD')`,
+      })
+      .from(transactions)
+      .where(eq(transactions.ledgerId, ledgerId));
+
+    return row?.date ?? null;
   }
 
   async getCount(ledgerId: string): Promise<number> {

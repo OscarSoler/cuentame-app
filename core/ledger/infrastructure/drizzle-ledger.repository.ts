@@ -5,6 +5,16 @@ import { Ledger, LedgerConfig } from "../domain/ledger.entity";
 import { LedgerRepository } from "../domain/ledger.repository";
 
 export class DrizzleLedgerRepository implements LedgerRepository {
+  async getById(ledgerId: string): Promise<Ledger | null> {
+    const [row] = await db
+      .select()
+      .from(ledgers)
+      .where(eq(ledgers.id, ledgerId))
+      .limit(1);
+
+    return row ? new Ledger(row as LedgerConfig) : null;
+  }
+
   async getByUserId(userId: string): Promise<Ledger[]> {
     const rows = await db
       .select()

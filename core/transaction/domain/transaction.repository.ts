@@ -29,6 +29,18 @@ export interface DailyTotal {
   expenses: number;
 }
 
+export interface RangeSummary {
+  income: number;
+  expenses: number;
+  incomeCount: number;
+  expenseCount: number;
+  totalCount: number;
+  taxedCount: number;
+  activeDays: number;
+  firstDate: string | null;
+  lastDate: string | null;
+}
+
 export interface TransactionRepository {
   getById(id: string): Promise<Transaction | null>;
   getByLedgerId(ledgerId: string): Promise<Transaction[]>;
@@ -46,6 +58,8 @@ export interface TransactionRepository {
   getDailyTotalsLastNDays(ledgerId: string, days: number): Promise<DailyTotal[]>;
   getActiveDates(ledgerId: string, sinceDays: number): Promise<string[]>;
   getCount(ledgerId: string): Promise<number>;
+  getRangeSummary(ledgerId: string, fromDate: string, toDate: string): Promise<RangeSummary>;
+  getOldestDate(ledgerId: string): Promise<string | null>;
   create(data: CreateTransactionData): Promise<Transaction>;
   update(id: string, data: UpdateTransactionData): Promise<Transaction>;
   delete(id: string): Promise<void>;
