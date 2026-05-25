@@ -42,21 +42,25 @@ export async function POST(req: Request) {
 
   let conversationId: string;
   try {
-    const [, conversation] = await Promise.all([
-      assertLedgerOwnership(session.user.id, ledgerId),
-      requestedConversationId
-        ? conversationRepo.getByIdForUser(
-            requestedConversationId,
-            session.user.id,
-          )
-        : new GetOrCreateLatest({ repository: conversationRepo }).execute(
-            ledgerId,
-          ),
-    ]);
+    await assertLedgerOwnership(session.user.id, ledgerId);
+
+    let conversation = requestedConversationId
+      ? await conversationRepo.getByIdForUser(
+          requestedConversationId,
+          session.user.id,
+        )
+      : null;
+
+    if (conversation && conversation.ledgerId !== ledgerId) {
+      conversation = null;
+    }
 
     if (!conversation) {
-      return new Response("Conversación no autorizada", { status: 403 });
+      conversation = await new GetOrCreateLatest({
+        repository: conversationRepo,
+      }).execute(ledgerId);
     }
+
     conversationId = conversation.id;
   } catch (err) {
     return new Response(err instanceof Error ? err.message : "No autorizado", {
@@ -80,16 +84,36 @@ export async function POST(req: Request) {
     system: getSystemPrompt(ledgerType),
     messages: await convertToModelMessages(messages),
     tools,
+    onError({ error }) {
+      console.error("[/api/chat] streamText error:", {
+        conversationId,
+        ledgerId,
+        ledgerType,
+        error: error instanceof Error ? { message: error.message, stack: error.stack } : error,
+      });
+    },
   });
 
   result.consumeStream();
 
-  return result.toUIMessageStreamResponse({
+  const response = result.toUIMessageStreamResponse({
     originalMessages: messages,
     async onFinish({ messages: finalMessages }) {
-      await new SaveMessages({ repository: conversationRepo }).execute(
-        toSaveMessagesInput(conversationId, finalMessages),
-      );
+      try {
+        await new SaveMessages({ repository: conversationRepo }).execute(
+          toSaveMessagesInput(conversationId, finalMessages),
+        );
+      } catch (error) {
+        console.error("[/api/chat] onFinish persist failed:", {
+          conversationId,
+          messageCount: finalMessages.length,
+          error: error instanceof Error ? error.message : error,
+        });
+        throw error;
+      }
     },
   });
+
+  response.headers.set("X-Conversation-Id", conversationId);
+  return response;
 }

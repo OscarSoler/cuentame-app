@@ -101,6 +101,11 @@ export async function signupPhoneAction(input: {
     };
   }
 
+  const ledgerRepo = new DrizzleLedgerRepository();
+  const existingLedgers = await new GetLedger({ repository: ledgerRepo }).byUserId(userId);
+  const existingTypes = new Set(existingLedgers.map((l) => l.type));
+  const missingTypes = types.filter((t) => !existingTypes.has(t));
+
   // Better Auth crea el usuario con name = phone (getTempName). Lo sobrescribimos
   // por Drizzle directo: auth.api.updateUser exigiría sessionMiddleware y la cookie
   // recién emitida no llega a este request.
@@ -109,20 +114,21 @@ export async function signupPhoneAction(input: {
     .set({ name: trimmedName })
     .where(eq(users.id, userId));
 
-  const createLedger = new CreateLedger({ repository: new DrizzleLedgerRepository() });
-  await Promise.all(
-    types.map((type) =>
-      createLedger.execute({
-        userId,
-        name: type === "business" ? (input.businessName?.trim() || trimmedName) : trimmedName,
-        type,
-        businessName: type === "business" ? input.businessName?.trim() ?? null : null,
-        businessType: type === "business" ? input.businessType?.trim() ?? null : null,
-      }),
-    ),
-  );
+  if (missingTypes.length > 0) {
+    const createLedger = new CreateLedger({ repository: ledgerRepo });
+    await Promise.all(
+      missingTypes.map((type) =>
+        createLedger.execute({
+          userId,
+          name: type === "business" ? (input.businessName?.trim() || trimmedName) : trimmedName,
+          type,
+          businessName: type === "business" ? input.businessName?.trim() ?? null : null,
+          businessType: type === "business" ? input.businessType?.trim() ?? null : null,
+        }),
+      ),
+    );
+    revalidateTag(`user-ledgers:${userId}`, "max");
+  }
 
-  revalidateTag(`user-ledgers:${userId}`, "max");
-
-  redirect("/chat");
+  redirect(existingLedgers.length > 0 ? "/dashboard" : "/chat");
 }

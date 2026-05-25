@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { conversations, ledgers, messages } from "@/lib/db/schema";
-import { and, asc, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq, gte, sql } from "drizzle-orm";
 import { Conversation } from "../domain/conversation.entity";
 import { Message, toMessageRole } from "../domain/message.entity";
 import {
@@ -113,16 +113,36 @@ export class DrizzleConversationRepository implements ConversationRepository {
     msgs: PersistedMessage[],
   ): Promise<void> {
     await db.transaction(async (tx) => {
-      await tx.delete(messages).where(eq(messages.conversationId, conversationId));
       if (msgs.length > 0) {
-        await tx.insert(messages).values(
-          msgs.map((m) => ({
-            conversationId,
-            seq: m.seq,
-            role: m.role,
-            parts: m.parts,
-          })),
-        );
+        await tx
+          .insert(messages)
+          .values(
+            msgs.map((m) => ({
+              conversationId,
+              seq: m.seq,
+              role: m.role,
+              parts: m.parts,
+            })),
+          )
+          .onConflictDoUpdate({
+            target: [messages.conversationId, messages.seq],
+            set: {
+              role: sql`excluded.role`,
+              parts: sql`excluded.parts`,
+            },
+          });
+        await tx
+          .delete(messages)
+          .where(
+            and(
+              eq(messages.conversationId, conversationId),
+              gte(messages.seq, msgs.length),
+            ),
+          );
+      } else {
+        await tx
+          .delete(messages)
+          .where(eq(messages.conversationId, conversationId));
       }
       await tx
         .update(conversations)

@@ -94,29 +94,51 @@ interface ChatContentReadyProps {
 }
 
 function ChatContentReady({
-  conversationId,
+  conversationId: initialConversationId,
   initialMessages,
   variant,
   ledgerId,
   ledgerType,
   onLedgerChange,
 }: ChatContentReadyProps) {
+  const conversationIdRef = useRef(initialConversationId);
+
+  const prepareSendMessagesRequest = useCallback(
+    ({ messages }: { messages: UIMessage[] }) => ({
+      body: {
+        messages,
+        ledgerId,
+        ledgerType,
+        conversationId: conversationIdRef.current,
+      },
+    }),
+    [ledgerId, ledgerType],
+  );
+
+  const chatFetch = useCallback(
+    async (input: RequestInfo | URL, init?: RequestInit) => {
+      const response = await fetch(input, init);
+      const resolved = response.headers.get("X-Conversation-Id");
+      if (resolved && resolved !== conversationIdRef.current) {
+        console.warn("[ChatContent] server rebound conversation:", {
+          from: conversationIdRef.current,
+          to: resolved,
+        });
+        conversationIdRef.current = resolved;
+      }
+      return response;
+    },
+    [],
+  );
+
   const transport = useMemo(
     () =>
       new DefaultChatTransport({
         api: "/api/chat",
-        prepareSendMessagesRequest({ messages }) {
-          return {
-            body: {
-              messages,
-              ledgerId,
-              ledgerType,
-              conversationId,
-            },
-          };
-        },
+        prepareSendMessagesRequest,
+        fetch: chatFetch,
       }),
-    [ledgerId, ledgerType, conversationId],
+    [prepareSendMessagesRequest, chatFetch],
   );
 
   const { messages, sendMessage, setMessages, status } = useChat({
@@ -132,24 +154,19 @@ function ChatContentReady({
     };
   }, []);
 
-  const persistMessages = useCallback(
-    (next: UIMessage[]) => {
-      const run = async () => {
-        const result = await saveMessagesAction(
-          toSaveMessagesInput(conversationId, next),
-        );
-        if (!result.success) {
-          console.error("[ChatContent] persist failed:", result.error);
-        }
-      };
-      const next$ = persistQueueRef.current
-        .catch(() => undefined)
-        .then(run);
-      persistQueueRef.current = next$;
-      return next$;
-    },
-    [conversationId],
-  );
+  const persistMessages = useCallback((next: UIMessage[]) => {
+    const run = async () => {
+      const result = await saveMessagesAction(
+        toSaveMessagesInput(conversationIdRef.current, next),
+      );
+      if (!result.success) {
+        console.error("[ChatContent] persist failed:", result.error);
+      }
+    };
+    const next$ = persistQueueRef.current.catch(() => undefined).then(run);
+    persistQueueRef.current = next$;
+    return next$;
+  }, []);
 
   const handleTransactionEdited = useCallback(
     (toolCallId: string, patch: Record<string, unknown>) => {
@@ -239,7 +256,11 @@ function applyEditToMessages(
     if (message.role !== "assistant") return message;
     let changed = false;
     const parts = message.parts.map((part) => {
-      const p = part as { type?: string; toolCallId?: string; output?: unknown };
+      const p = part as {
+        type?: string;
+        toolCallId?: string;
+        output?: unknown;
+      };
       if (
         typeof p.type === "string" &&
         p.type.startsWith("tool-") &&
@@ -255,11 +276,16 @@ function applyEditToMessages(
       }
       return part;
     });
-    return changed ? { ...message, parts: parts as typeof message.parts } : message;
+    return changed
+      ? { ...message, parts: parts as typeof message.parts }
+      : message;
   });
 }
 
-function removeToolPart(messages: UIMessage[], toolCallId: string): UIMessage[] {
+function removeToolPart(
+  messages: UIMessage[],
+  toolCallId: string,
+): UIMessage[] {
   return messages
     .map((message) => {
       if (message.role !== "assistant") return message;
@@ -270,5 +296,7 @@ function removeToolPart(messages: UIMessage[], toolCallId: string): UIMessage[] 
       if (parts.length === message.parts.length) return message;
       return { ...message, parts: parts as typeof message.parts };
     })
-    .filter((message) => message.role !== "assistant" || message.parts.length > 0);
+    .filter(
+      (message) => message.role !== "assistant" || message.parts.length > 0,
+    );
 }
